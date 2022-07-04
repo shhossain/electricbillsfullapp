@@ -1,0 +1,82 @@
+import 'package:electricbills/api/sign_user.dart';
+import 'package:electricbills/env.dart';
+import 'package:electricbills/models/user.dart';
+import 'package:electricbills/screens/home.dart';
+import 'package:electricbills/screens/loading.dart';
+import 'package:electricbills/screens/sign_user.dart';
+import 'package:electricbills/widgets/goto.dart';
+import 'package:flutter/material.dart';
+
+class LoginPage extends StatefulWidget {
+  const LoginPage({Key? key}) : super(key: key);
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController usenameController = TextEditingController();
+
+  final TextEditingController passwordController = TextEditingController();
+
+  final TextEditingController housenameController = TextEditingController();
+
+  final TextEditingController roleController = TextEditingController();
+
+  String? warningMsg;
+  bool firstTime = true;
+
+  login(context) {
+    var usename = usenameController.text;
+    var password = passwordController.text;
+    var housename = housenameController.text;
+    var role = roleController.text;
+
+    User user = User(
+        username: usename,
+        password: password,
+        housename: housename,
+        role: role);
+    Sign sign = Sign(user: user);
+    currentUser = user;
+    goto(
+        context,
+        LoadingPage(
+          future: sign.logIn(),
+          successPage: HomePage(
+            user: user,
+          ),
+          failurePage: const LoginPage(),
+        ));
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    if (firstTime) {
+      firstTime = false;
+      if (signWaringMsg != null) {
+        warningMsg = signWaringMsg;
+        signWaringMsg = null;
+      }
+      if (currentUser != null) {
+        var user = currentUser!;
+        usenameController.text = user.username;
+        passwordController.text = user.password;
+        housenameController.text = user.housename;
+        roleController.text = user.role;
+      }
+    }
+
+    return UserSign(
+        signType: "Login",
+        usenameController: usenameController,
+        passwordController: passwordController,
+        housenameController: housenameController,
+        roleController: roleController,
+        warningMsg: warningMsg,
+        onPressed: () {
+          login(context);
+        });
+  }
+}
