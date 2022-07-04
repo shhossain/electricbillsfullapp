@@ -10,4 +10,6 @@ This app helps you to log your monthly elctricity bills.
 - Delete users
 
 ## Releases :
-[Latest release 1.0.3 ](https://github.com/shhossain/electricbillsfullapp/releases)
+[Latest version 1.0.3 ](https://github.com/shhossain/electricbillsfullapp/releases/download/1.0.3/electribills.apk)
+
+[Releases](https://github.com/shhossain/electricbillsfullapp/releases)
