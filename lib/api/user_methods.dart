@@ -509,4 +509,35 @@ class Users {
     }
     return [success, msg];
   }
+
+
+  getWaterBillForView(String month, String year){
+    var body = user.toJson();
+    body['month'] = months[month].toString();
+    body['year'] = year.toString();
+
+    String url = "$apiUrl/api/water/get_water_bill/one";
+    var response = requests.post(url: url, body: body);
+    var jsonData = jsonDecodeAny(response.body);
+    var success = jsonData['success'];
+    if (success) {
+      return [true, jsonData['msg']];
+    }
+    return [false, jsonData['msg']];
+  }
+
+  getWaterBillForViewAll(){
+    var body = user.toJson();
+    body['month'] = months[0].toString();
+    body['year'] = '2000';
+
+    String url = "$apiUrl/api/water/get_water_bill/all";
+    var response = requests.post(url: url, body: body);
+    var jsonData = jsonDecodeAny(response.body);
+    var success = jsonData['success'];
+    if (success) {
+      return [true, jsonData['msg']];
+    }
+    return [false, jsonData['msg']];
+  }
 }

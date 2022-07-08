@@ -3,8 +3,6 @@ import 'dart:io';
 import 'package:electricbills/screens/login.dart';
 import 'package:flutter/material.dart';
 
-bool kDebugMode = false;
-
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {

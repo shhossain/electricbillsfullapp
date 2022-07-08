@@ -1,8 +1,10 @@
+import 'package:electricbills/constants.dart';
 import 'package:electricbills/models/bill.dart';
 import 'package:electricbills/models/user.dart';
 import 'package:electricbills/widgets/appbar.dart';
 import 'package:electricbills/widgets/buttons.dart';
 import 'package:electricbills/widgets/goto.dart';
+import 'package:electricbills/widgets/rounded_box.dart';
 import 'package:electricbills/widgets/texts.dart';
 import 'package:flutter/material.dart';
 
@@ -21,15 +23,88 @@ var monthes = [
   'December'
 ];
 
-class ViewerPage extends StatelessWidget {
+class ViewerPage extends StatefulWidget {
   final User user;
-  const ViewerPage({Key? key, required this.user}) : super(key: key);
+  final String? whichBill;
+  const ViewerPage({Key? key, required this.user, this.whichBill})
+      : super(key: key);
+
+  @override
+  State<ViewerPage> createState() => _ViewerPageState();
+}
+
+class _ViewerPageState extends State<ViewerPage> {
+  String? _selectedBill;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedBill = widget.whichBill ?? 'electricity';
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: viewAppBar(context),
-      body: ViewBills(user: user),
+      body: Column(
+        children: [
+          Expanded(
+            child: ViewBills(user: widget.user),
+          ),
+          Padding(
+            padding: EdgeInsets.all(kDefaultPadding),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                // tab for electricity and water
+                AnimatedContainer(
+                  duration: Duration(milliseconds: 500),
+                  width: _selectedBill == 'electricity'
+                      ? MediaQuery.of(context).size.width * 0.35
+                      : MediaQuery.of(context).size.width * 0.25,
+                  child: MyTextButton(
+                    onPressed: () {
+                      setState(() {
+                        _selectedBill = 'electricity';
+                      });
+                    },
+                    backgroundColor: _selectedBill == 'electricity'
+                        ? Colors.blue.shade400
+                        : Colors.grey[200],
+                    label: RounderBox(
+                      child: Center(child: MyText(text: 'Electricity')),
+                      width: 100,
+                      height: 30,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10),
+                AnimatedContainer(
+                  duration: Duration(milliseconds: 500),
+                  width: _selectedBill == 'water'
+                      ? MediaQuery.of(context).size.width * 0.35
+                      : MediaQuery.of(context).size.width * 0.25,
+                  child: MyTextButton(
+                    onPressed: () {
+                      setState(() {
+                        _selectedBill = 'water';
+                      });
+                    },
+                    backgroundColor: _selectedBill == 'water'
+                        ? Colors.blue.shade400
+                        : Colors.grey[200],
+                    label: RounderBox(
+                      child: Center(child: MyText(text: 'Water')),
+                      width: 100,
+                      height: 30,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
     );
   }
 }
@@ -92,11 +167,17 @@ class ViewBills extends StatelessWidget {
                   child: MyTextButton(
                     backgroundColor: Colors.black.withOpacity(0.1),
                     onPressed: () => goto(
-                        context, ViewBillData(bill: bills[index], user: user,appBar: viewAppBar(context),)),
+                        context,
+                        ViewBillData(
+                          bill: bills[index],
+                          user: user,
+                          appBar: viewAppBar(context),
+                        )),
                     label: ListTile(
                       title: Text(bills[index].stringMonth),
                       subtitle: Text(bills[index].year.toString()),
-                      trailing: Text("${bills[index].totalUsage} X ${bills[index].unitPrice} = ${bills[index].totalAmmount}"),
+                      trailing: Text(
+                          "${bills[index].totalUsage} X ${bills[index].unitPrice} = ${bills[index].totalAmmount}"),
                     ),
                   ),
                 );
@@ -108,7 +189,8 @@ class ViewBills extends StatelessWidget {
 }
 
 class ViewBillData extends StatelessWidget {
-  const ViewBillData({Key? key, required this.bill, required this.user,required this.appBar})
+  const ViewBillData(
+      {Key? key, required this.bill, required this.user, required this.appBar})
       : super(key: key);
 
   final Bill bill;
@@ -134,23 +216,28 @@ class ViewBillData extends StatelessWidget {
           ),
           ListTile(
             title: const MyText(text: 'Meter Reading'),
-            trailing: MyText(text: '${bill.totalUnits.toStringAsFixed(2)} units'),
+            trailing:
+                MyText(text: '${bill.totalUnits.toStringAsFixed(2)} units'),
           ),
           ListTile(
             title: const MyText(text: 'Previous Reading'),
-            trailing: MyText(text: '${bill.previousMonthUnits.toStringAsFixed(2)} units'),
+            trailing: MyText(
+                text: '${bill.previousMonthUnits.toStringAsFixed(2)} units'),
           ),
           ListTile(
             title: const MyText(text: 'Monthly Usage'),
-            trailing: MyText(text: '${bill.usedUnits.toStringAsFixed(2)} units'),
+            trailing:
+                MyText(text: '${bill.usedUnits.toStringAsFixed(2)} units'),
           ),
           ListTile(
             title: const MyText(text: 'Extra Usage'),
-            trailing: MyText(text: '${bill.extraUnit.toStringAsFixed(2)} units'),
+            trailing:
+                MyText(text: '${bill.extraUnit.toStringAsFixed(2)} units'),
           ),
           ListTile(
             title: const MyText(text: 'Total Usage'),
-            trailing: MyText(text: '${bill.totalUsage.toStringAsFixed(2)} units'),
+            trailing:
+                MyText(text: '${bill.totalUsage.toStringAsFixed(2)} units'),
           ),
           ListTile(
             title: const MyText(text: 'Unit Price'),
@@ -158,7 +245,8 @@ class ViewBillData extends StatelessWidget {
           ),
           ListTile(
             title: const MyText(text: 'Monthly Bill'),
-            trailing: MyText(text: '${bill.totalAmmount.toStringAsFixed(2)} \$'),
+            trailing:
+                MyText(text: '${bill.totalAmmount.toStringAsFixed(2)} \$'),
           ),
         ],
       ),
