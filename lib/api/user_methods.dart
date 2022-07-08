@@ -297,29 +297,6 @@ class Users {
     return [false, jsonData['msg']];
   }
 
-// def water(username,password,housename,year,month,amount,action):
-//     if action == 'add_water':
-//         waterdata:WaterBill = WaterBill(WATERDATA_PATH)
-//         waterdata.add_bill(username=username, housename=housename, year=year, month=month, amount=amount)
-//         return jsonify({'success': True, 'msg': 'Water added successfully'})
-//     elif action == 'get_bills':
-//         data = waterdata.get_bills(username, housename)
-//         # custom_print('/api/water/get_waters data: ', data,color='blue')
-//         return jsonify({'success': True, 'msg': data})
-//     elif action == 'get_bill':
-//         data = waterdata.get_bill(username, housename, year, month)
-//         # custom_print('/api/water/get_bill data: ', data,color='blue')
-//         return jsonify({'success': True, 'msg': data})
-//     elif action == 'get_biils_date':
-//         data = waterdata.get_bills_date(housename, month, year)
-//         # custom_print('/api/water/get_bills_data data: ', data,color='blue')
-//         return jsonify({'success': True, 'msg': data})
-//     elif action == 'delete_bill':
-//         waterdata.delete_bill(username=username, housename=housename, year=year, month=month)
-//         return jsonify({'success': True, 'msg': 'Water deleted successfully'})
-//     elif action == 'edit_bill':
-//         waterdata.edit_bill(username=username, housename=housename, year=year, month=month, amount=amount)
-//         return jsonify({'success': True, 'msg': 'Water edited successfully'})
 
   addWaterBill(
       User addUser, String month, String year, double totalAmmount) async {
@@ -526,18 +503,21 @@ class Users {
     return [false, jsonData['msg']];
   }
 
-  getWaterBillForViewAll(){
+  Future<List<WaterBill>> getWaterBillForViewAll() async{
     var body = user.toJson();
     body['month'] = months[0].toString();
     body['year'] = '2000';
 
     String url = "$apiUrl/api/water/get_water_bill/all";
-    var response = requests.post(url: url, body: body);
+    var response = await requests.post(url: url, body: body);
     var jsonData = jsonDecodeAny(response.body);
     var success = jsonData['success'];
+    List<WaterBill> waterBills = [];
     if (success) {
-      return [true, jsonData['msg']];
+      for (var bill in jsonData['msg']) {
+        waterBills.add(WaterBill.fromJson(bill));
+      }
     }
-    return [false, jsonData['msg']];
+    return waterBills;
   }
 }

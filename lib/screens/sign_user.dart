@@ -89,7 +89,6 @@ class _UserSignState extends State<UserSign> {
     String url = "$apiUrl/api/update";
     var response = await requests.post(url: url, body: body);
     var jsonData = jsonDecodeAny(response.body);
-    printf('jsonData: $jsonData body ${response.body}');
     var success = jsonData['success'];
     if (success) {
       var updateAvailable = jsonData['updateAvailable'];

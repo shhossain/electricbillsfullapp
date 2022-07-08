@@ -1,4 +1,6 @@
+import 'package:electricbills/api/user_methods.dart';
 import 'package:electricbills/constants.dart';
+import 'package:electricbills/helper/helper_func.dart';
 import 'package:electricbills/models/bill.dart';
 import 'package:electricbills/models/user.dart';
 import 'package:electricbills/widgets/appbar.dart';
@@ -49,7 +51,7 @@ class _ViewerPageState extends State<ViewerPage> {
       body: Column(
         children: [
           Expanded(
-            child: ViewBills(user: widget.user),
+            child: ViewBills(whichBill: _selectedBill, user: widget.user),
           ),
           Padding(
             padding: EdgeInsets.all(kDefaultPadding),
@@ -111,14 +113,28 @@ class _ViewerPageState extends State<ViewerPage> {
 
 class ViewBills extends StatelessWidget {
   final User user;
-  const ViewBills({Key? key, required this.user}) : super(key: key);
+  final String? whichBill;
+  const ViewBills({Key? key, required this.user, this.whichBill})
+      : super(key: key);
+
+  _getFullBill() async {
+    var result = [];
+    result.add(await user.getBills());
+    Users users = Users(user: user);
+    result.add(await users.getWaterBillForViewAll());
+    return result;
+  }
+
+  _getBills() {
+    return _getFullBill();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: FutureBuilder(
-          future: user.getBills(),
-          builder: (context, AsyncSnapshot<List<Bill>?> snapshot) {
+          future: _getBills(),
+          builder: (context, AsyncSnapshot snapshot) {
             ConnectionState connectionState = snapshot.connectionState;
             if (connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -126,7 +142,13 @@ class ViewBills extends StatelessWidget {
               if (snapshot.hasError) {
                 return Center(child: Text('Error: ${snapshot.error}'));
               } else {
-                List<Bill> bills = snapshot.data!;
+                var bills = snapshot.data[0];
+                var waterBills = snapshot.data[1];
+
+                List<Bill> ebills = bills;
+                List<WaterBill> wbills = waterBills;
+
+                printf('ebills: ${ebills.length} wbills: ${wbills.length}');
                 return Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -144,7 +166,9 @@ class ViewBills extends StatelessWidget {
                           text: "Bills",
                           fontSize: 20,
                           fontWeight: FontWeight.bold),
-                      billData(bills.reversed.toList()),
+                      whichBill == 'water'
+                          ? wbillData(wbills.reversed.toList())
+                          : billData(ebills.reversed.toList(), wbills),
                     ],
                   ),
                 );
@@ -156,7 +180,31 @@ class ViewBills extends StatelessWidget {
     );
   }
 
-  Expanded billData(List<Bill> bills) {
+  Expanded wbillData(List<WaterBill> bills) {
+    return Expanded(
+      child: bills.isNotEmpty
+          ? ListView.builder(
+              itemCount: bills.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 3.0),
+                  child: MyTextButton(
+                    backgroundColor: Colors.black.withOpacity(0.1),
+                    onPressed: () {},
+                    label: ListTile(
+                      title: Text(bills[index].stringMonth),
+                      subtitle: Text(bills[index].year.toString()),
+                      trailing: Text(bills[index].amount.toString()),
+                    ),
+                  ),
+                );
+              },
+            )
+          : const Center(child: MyText(text: "No Bills Found", fontSize: 20)),
+    );
+  }
+
+  Expanded billData(List<Bill> bills, List<WaterBill> wbills) {
     return Expanded(
       child: bills.isNotEmpty
           ? ListView.builder(
@@ -172,6 +220,7 @@ class ViewBills extends StatelessWidget {
                           bill: bills[index],
                           user: user,
                           appBar: viewAppBar(context),
+                          waterBills: wbills,
                         )),
                     label: ListTile(
                       title: Text(bills[index].stringMonth),
@@ -190,29 +239,52 @@ class ViewBills extends StatelessWidget {
 
 class ViewBillData extends StatelessWidget {
   const ViewBillData(
-      {Key? key, required this.bill, required this.user, required this.appBar})
+      {Key? key,
+      required this.bill,
+      required this.user,
+      required this.appBar,
+      required this.waterBills})
       : super(key: key);
 
   final Bill bill;
+  final List<WaterBill> waterBills;
   final User user;
   final AppBar appBar;
 
+  getMatchingWaterBill() {
+    for (WaterBill wbill in waterBills) {
+      if (wbill.month == bill.month && wbill.year == bill.year) {
+        printf('wbill: ${wbill.toJson()}');
+        return wbill;
+      }
+    }
+    return null;
+  }
+
+  getTotal(WaterBill? wbill) {
+    var wbillAmount = wbill?.amount ?? 0;
+    var billAmount = bill.totalAmmount;
+    return wbillAmount + billAmount;
+  }
+
   @override
   Widget build(BuildContext context) {
+    WaterBill? wbill = getMatchingWaterBill();
+
     return Scaffold(
       appBar: viewAppBar(context),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const MyText(
-            text: 'Electric Bill',
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
           ListTile(
             title: const MyText(text: "For"),
             subtitle: MyText(text: user.username),
             trailing: MyText(text: '${bill.stringMonth} ${bill.year}'),
+          ),
+          const MyText(
+            text: 'Electric Bill',
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
           ),
           ListTile(
             title: const MyText(text: 'Meter Reading'),
@@ -248,6 +320,34 @@ class ViewBillData extends StatelessWidget {
             trailing:
                 MyText(text: '${bill.totalAmmount.toStringAsFixed(2)} \$'),
           ),
+          const MyText(
+            text: 'Water Bill',
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+          ListTile(
+            title: const MyText(text: 'Total'),
+            trailing: MyText(
+                text:
+                    '${(wbill != null ? wbill.amount : 0).toStringAsFixed(2)} \$'),
+          ),
+          Container(
+            height: 1,
+            width: MediaQuery.of(context).size.width * .95,
+            color: Colors.black.withOpacity(0.5),
+          ),
+          ListTile(
+            title: const MyText(
+              text: "Total",
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            ),
+            trailing: MyText(
+              text: '${getTotal(wbill).toStringAsFixed(2)} \$',
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            ),
+          )
         ],
       ),
     );
