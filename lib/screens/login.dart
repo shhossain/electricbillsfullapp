@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:electricbills/api/sign_user.dart';
 import 'package:electricbills/env.dart';
+import 'package:electricbills/helper/helper_func.dart';
 import 'package:electricbills/models/user.dart';
 import 'package:electricbills/screens/home.dart';
 import 'package:electricbills/screens/loading.dart';
@@ -50,9 +53,38 @@ class _LoginPageState extends State<LoginPage> {
         ));
   }
 
+  Future<bool> isinternet() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return true;
+      }
+    } on SocketException catch (_) {
+      return false;
+    }
+    return false;
+  }
+
+  checkInternet(BuildContext context) async {
+    if (!checkedInternet) {
+      checkedInternet = true;
+      while (true) {
+        if ((await isinternet())) {
+          internetAvailable = true;
+          return;
+        }
+        internetAvailable = false;
+        showSnackBar(context, 'No Internet Connection',
+            duration: 3, icon: Icon(Icons.wifi_off, color: Colors.white));
+        await Future.delayed(Duration(seconds: 60));
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    checkInternet(context);
+
     if (firstTime) {
       firstTime = false;
       if (signWaringMsg != null) {

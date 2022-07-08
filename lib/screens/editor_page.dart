@@ -260,23 +260,26 @@ class UserPage extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: Hero(
-                    tag: 'userList',
-                    child: ListView.builder(
-                      itemCount: snapshot.data!.length,
-                      itemBuilder: (context, index) {
-                        List<User> sortedUsers = sortUsersByTotalAmmount(users);
-                        return UserData(
-                          user: sortedUsers[index],
-                          editorUser: user,
-                          month: month,
-                          year: year,
-                          totalAmount: totalUsageAndAmount[1],
-                        );
-                      },
-                    ),
+                  child: ListView.builder(
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      List<User> sortedUsers = sortUsersByTotalAmmount(users);
+                      return UserData(
+                        user: sortedUsers[index],
+                        editorUser: user,
+                        month: month,
+                        year: year,
+                        totalAmount: totalUsageAndAmount[1],
+                      );
+                    },
                   ),
                 ),
+                Row(
+                  children: [
+                    MyTextButton(label: MyText(text: 'Electricity')),
+                    MyTextButton(label: MyText(text: 'Water')),
+                  ],
+                )
               ],
             );
           }

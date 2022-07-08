@@ -1,4 +1,5 @@
 import 'package:electricbills/env.dart';
+import 'package:electricbills/helper/helper_func.dart';
 import 'package:flutter/material.dart';
 
 class LoadingPage extends StatelessWidget {
@@ -19,6 +20,7 @@ class LoadingPage extends StatelessWidget {
         future: future,
         builder: (builder, snapshot) {
           ConnectionState connectionState = snapshot.connectionState;
+          String msg = '';
           if (connectionState == ConnectionState.waiting) {
             return const Scaffold(
               body: Center(
@@ -29,10 +31,14 @@ class LoadingPage extends StatelessWidget {
             if (snapshot.hasData) {
               var data = snapshot.data as List;
               if (data[0]) {
+                msg = data[1];
+                showSnackBar(context, msg,icon: Icon(Icons.check,color: Colors.green.shade400,));
                 return successPage;
               } else {
+                msg = data[1];
                 signWaringMsg = data[1];
                 addUserWaringMsg = data[1];
+                showSnackBar(context, msg,icon: Icon(Icons.error,color: Colors.red.shade400,));
                 return failurePage;
               }
             } else {
