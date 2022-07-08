@@ -10,6 +10,7 @@ class MyTextField extends StatefulWidget {
   final Widget? suffix;
   final dynamic onChanged;
   final Color? color;
+  final TextInputType? keyboardType;
   const MyTextField(
       {Key? key,
       required this.name,
@@ -18,7 +19,8 @@ class MyTextField extends StatefulWidget {
       this.color,
       this.suffix,
       this.onChanged,
-      this.obscureText})
+      this.obscureText,
+      this.keyboardType})
       : super(key: key);
 
   @override
@@ -56,6 +58,7 @@ class _MyTextFieldState extends State<MyTextField> {
             widget.onChanged(value);
           }
         },
+        keyboardType: widget.keyboardType,
         obscureText: widget.obscureText ?? false,
         controller: widget.controller,
         decoration: InputDecoration(

@@ -1,4 +1,5 @@
 import 'package:electricbills/api/user_methods.dart';
+import 'package:electricbills/constants.dart';
 import 'package:electricbills/env.dart';
 import 'package:electricbills/helper/helper_func.dart';
 import 'package:electricbills/models/bill.dart';
@@ -11,11 +12,13 @@ import 'package:electricbills/widgets/goto.dart';
 import 'package:electricbills/widgets/rounded_box.dart';
 import 'package:electricbills/widgets/text_field.dart';
 import 'package:electricbills/widgets/texts.dart';
+import 'package:electricbills/widgets/water_bill.dart';
 import 'package:flutter/material.dart';
 
 class EditorPage extends StatefulWidget {
   final User user;
-  const EditorPage({Key? key, required this.user}) : super(key: key);
+  final String? selectedBill;
+  const EditorPage({Key? key, required this.user,this.selectedBill}) : super(key: key);
 
   @override
   State<EditorPage> createState() => _EditorPageState();
@@ -28,6 +31,8 @@ class _EditorPageState extends State<EditorPage> {
   final TextEditingController _yearController = TextEditingController();
   String? _selectedMonth;
   String? _selectedYear;
+  String? _selectedBill;
+  List<String>? _years;
 
   @override
   void initState() {
@@ -35,6 +40,8 @@ class _EditorPageState extends State<EditorPage> {
     addUserWaringMsg = null;
     signWaringMsg = null;
     actionWidget = AddUser(user: widget.user);
+    _selectedBill = widget.selectedBill ?? 'electricity';
+    _years = List.generate(20, (i) => (currentDate.year - 10 + i).toString());
   }
 
   changeActionWidget(Widget widget) {
@@ -45,9 +52,6 @@ class _EditorPageState extends State<EditorPage> {
 
   @override
   Widget build(BuildContext context) {
-    List<String> years =
-        List.generate(20, (i) => (currentDate.year - 10 + i).toString());
-
     return Scaffold(
       appBar: editorAppBar(context),
       body: Column(
@@ -68,6 +72,7 @@ class _EditorPageState extends State<EditorPage> {
                         itemFontSize: 14,
                         value: allmonths[currentDate.intMonth - 1],
                         onChanged: (value) {
+                          saveMonth = value;
                           setState(() {
                             _selectedMonth = value;
                           });
@@ -78,10 +83,11 @@ class _EditorPageState extends State<EditorPage> {
                       width: MediaQuery.of(context).size.width * 0.4,
                       child: MyDropDownButton(
                         controller: _yearController,
-                        items: years,
+                        items: _years!,
                         value: currentDate.year.toString(),
                         itemFontSize: 15,
                         onChanged: (value) {
+                          saveYear = value;
                           setState(() {
                             _selectedYear = int.parse(value).toString();
                           });
@@ -92,12 +98,65 @@ class _EditorPageState extends State<EditorPage> {
             ),
           ),
           Expanded(
-            child: UserPage(
+            child: ShowBill(
+              whichBill: _selectedBill ?? 'electricity',
               user: widget.user,
               month: _selectedMonth ?? currentDate.month,
               year: _selectedYear ?? currentDate.year.toString(),
             ),
           ),
+          Padding(
+            padding: EdgeInsets.all(kDefaultPadding),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                // tab for electricity and water
+                AnimatedContainer(
+                  duration: Duration(milliseconds: 500),
+                  width: _selectedBill == 'electricity'
+                      ? MediaQuery.of(context).size.width * 0.35
+                      : MediaQuery.of(context).size.width * 0.25,
+                  child: MyTextButton(
+                    onPressed: () {
+                      setState(() {
+                        _selectedBill = 'electricity';
+                      });
+                    },
+                    backgroundColor: _selectedBill == 'electricity'
+                        ? Colors.blue.shade400
+                        : Colors.grey[200],
+                    label: RounderBox(
+                      child: Center(child: MyText(text: 'Electricity')),
+                      width: 100,
+                      height: 30,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10),
+                AnimatedContainer(
+                  duration: Duration(milliseconds: 500),
+                  width: _selectedBill == 'water'
+                      ? MediaQuery.of(context).size.width * 0.35
+                      : MediaQuery.of(context).size.width * 0.25,
+                  child: MyTextButton(
+                    onPressed: () {
+                      setState(() {
+                        _selectedBill = 'water';
+                      });
+                    },
+                    backgroundColor: _selectedBill == 'water'
+                        ? Colors.blue.shade400
+                        : Colors.grey[200],
+                    label: RounderBox(
+                      child: Center(child: MyText(text: 'Water')),
+                      width: 100,
+                      height: 30,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
         ],
       ),
       floatingActionButton: IconButton(
@@ -107,6 +166,29 @@ class _EditorPageState extends State<EditorPage> {
         },
       ),
     );
+  }
+}
+
+class ShowBill extends StatelessWidget {
+  final User user;
+  final String month;
+  final String year;
+  final String whichBill;
+  const ShowBill(
+      {Key? key,
+      required this.user,
+      required this.month,
+      required this.year,
+      required this.whichBill})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    if (whichBill.contains('elect')) {
+      return UserPage(user: user, month: month, year: year);
+    } else {
+      return ShowWaterBill(user: user, month: month, year: year);
+    }
   }
 }
 
@@ -155,7 +237,7 @@ class UserPage extends StatelessWidget {
             return Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: EdgeInsets.all(kDefaultPadding),
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width,
                     child: Row(
@@ -178,18 +260,21 @@ class UserPage extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: snapshot.data!.length,
-                    itemBuilder: (context, index) {
-                      List<User> sortedUsers = sortUsersByTotalAmmount(users);
-                      return UserData(
-                        user: sortedUsers[index],
-                        editorUser: user,
-                        month: month,
-                        year: year,
-                        totalAmount: totalUsageAndAmount[1],
-                      );
-                    },
+                  child: Hero(
+                    tag: 'userList',
+                    child: ListView.builder(
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: (context, index) {
+                        List<User> sortedUsers = sortUsersByTotalAmmount(users);
+                        return UserData(
+                          user: sortedUsers[index],
+                          editorUser: user,
+                          month: month,
+                          year: year,
+                          totalAmount: totalUsageAndAmount[1],
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -228,15 +313,6 @@ class _UserDataState extends State<UserData> {
   @override
   void initState() {
     super.initState();
-  }
-
-  showSnackBar(BuildContext context) {
-    if (addUserWaringMsg != null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(addUserWaringMsg.toString()),
-        duration: const Duration(seconds: 2),
-      ));
-    }
   }
 
   List<Color> getGradiantColors() {
@@ -361,7 +437,7 @@ class _ViewBillsState extends State<ViewBills> {
                 List<Bill> bills = snapshot.data!;
 
                 return Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: EdgeInsets.all(kDefaultPadding),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -657,7 +733,7 @@ class _AddUnitState extends State<AddUnit> {
       appBar: editorAppBar(context),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(kDefaultPadding),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -772,6 +848,7 @@ class _AddUnitState extends State<AddUnit> {
                 controller: _monthController,
                 value: allmonths[currentDate.month - 1],
                 onChanged: (value) async {
+                  saveMonth = value;
                   await updatePrevMonthUnit();
                 },
               ),
@@ -780,6 +857,7 @@ class _AddUnitState extends State<AddUnit> {
                 controller: _yearController,
                 value: currentDate.year.toString(),
                 onChanged: (String? val) async {
+                  saveYear = val;
                   await updatePrevMonthUnit();
                 },
               ),
@@ -910,7 +988,7 @@ class _AddUserState extends State<AddUser> {
     return Scaffold(
         appBar: editorAppBar(context),
         body: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(kDefaultPadding),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,

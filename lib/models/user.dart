@@ -10,6 +10,7 @@ class User {
   final String role;
   final String? email;
   final List<Bill>? bills;
+  WaterBill? waterBill;
   double? unitPrice;
   double? totalUnit;
   double? previousMonthUnit;
@@ -22,6 +23,7 @@ class User {
       required this.role,
       this.email,
       this.bills,
+      this.waterBill,
       this.unitPrice,
       this.totalUnit,
       this.previousMonthUnit,
@@ -53,6 +55,7 @@ class User {
   get monthlyUsedUnits => (totalUnits - previousMonthUnits);
   get totalUsedUnits => (monthlyUsedUnits + extraUnits);
   get totalAmount => totalUsedUnits * perUnit;
+  get waterAmount => waterBill?.amount ?? 0;
 
   double currentUnit() {
     return (totalUnit ?? 0) - (previousMonthUnit ?? 0);
