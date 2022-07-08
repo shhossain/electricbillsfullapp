@@ -22,6 +22,7 @@ jsonDecodeAny(dynamic value) {
   try {
     return jsonDecode(value);
   } catch (e) {
+    printf('jsonDecodeAny error: $e');
     return {"success": false, "msg": "Something went wrong"};
   }
 }

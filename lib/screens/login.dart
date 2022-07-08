@@ -76,7 +76,7 @@ class _LoginPageState extends State<LoginPage> {
         internetAvailable = false;
         showSnackBar(context, 'No Internet Connection',
             duration: 3, icon: Icon(Icons.wifi_off, color: Colors.white));
-        await Future.delayed(Duration(seconds: 60));
+        await Future.delayed(Duration(seconds: internetAvailable ? 60 : 10));
       }
     }
   }

@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:electricbills/helper/error_helper.dart';
+import 'package:electricbills/helper/helper_func.dart';
 import 'package:electricbills/helper/myclasses.dart';
 import 'package:http/http.dart' as http;
 
@@ -11,9 +14,9 @@ class requests {
     try {
       return await http.post(Uri.parse(url), body: body);
     } catch (e) {
-      print(e);
-      body = {'success': 'false', 'msg': e.toString()};
-      DemoResponse response = DemoResponse(body.toString(), 500);
+      var error = ErrorMessage(e.runtimeType);
+      var demoBody = jsonEncode({'success': false, 'msg': error.getMessage()});
+      DemoResponse response = DemoResponse(demoBody, 500);
       return response;
     }
   }
