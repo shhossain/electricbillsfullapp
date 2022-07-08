@@ -50,3 +50,35 @@ class Bill {
   get totalAmmount => totalUsage * unitPrice;
 
 }
+
+class WaterBill {
+  // name, year, month, amount
+  final String name;
+  final int year;
+  final int month;
+  final double amount;
+
+  WaterBill({required this.name, required this.year, required this.month, required this.amount});
+
+  // from json
+  factory WaterBill.fromJson(Map<String, dynamic> json) {
+    return WaterBill(
+      name: json['name'],
+      year: json['year'],
+      month: json['month'],
+      amount: json['amount'],
+    );
+  }
+
+  // to json
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'year': year,
+      'month': month,
+      'amount': amount,
+    };
+  }
+
+  get stringMonth => allmonths[month - 1];
+}
