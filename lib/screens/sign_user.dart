@@ -50,6 +50,7 @@ class _UserSignState extends State<UserSign> {
   bool addEmail = true;
   String? warningMsg;
   String? roleValue;
+  bool isSnackBarShown = false;
 
   bool vaildEmail(String email) {
     return RegExp(
@@ -124,8 +125,11 @@ class _UserSignState extends State<UserSign> {
       }
     }
     else {
-      // ignore: use_build_context_synchronously
-      showSnackBar(context, jsonData['msg']);
+      if (!isSnackBarShown){
+        // ignore: use_build_context_synchronously
+        showSnackBar(context, jsonData['msg']);
+        isSnackBarShown = true;
+      }
     }
   }
 

@@ -2,7 +2,7 @@ import 'package:electricbills/env.dart';
 import 'package:electricbills/helper/helper_func.dart';
 import 'package:flutter/material.dart';
 
-class LoadingPage extends StatelessWidget {
+class LoadingPage extends StatefulWidget {
   final dynamic future;
   final dynamic successPage;
   final dynamic failurePage;
@@ -15,9 +15,15 @@ class LoadingPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<LoadingPage> createState() => _LoadingPageState();
+}
+
+class _LoadingPageState extends State<LoadingPage> {
+  bool isSnackBarShown = false;
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: future,
+        future: widget.future,
         builder: (builder, snapshot) {
           ConnectionState connectionState = snapshot.connectionState;
           String msg = '';
@@ -32,20 +38,26 @@ class LoadingPage extends StatelessWidget {
               var data = snapshot.data as List;
               if (data[0]) {
                 msg = data[1];
-                showSnackBar(context, msg,icon: Icon(Icons.check,color: Colors.green.shade400,));
-                return successPage;
+                if (!isSnackBarShown) {
+                  showSnackBar(context, msg,icon: Icon(Icons.check,color: Colors.green.shade400,));
+                  isSnackBarShown = true;
+                }
+                return widget.successPage;
               } else {
                 msg = data[1];
                 signWaringMsg = data[1];
                 addUserWaringMsg = data[1];
-                showSnackBar(context, msg,icon: Icon(Icons.error,color: Colors.red.shade400,));
-                return failurePage;
+                if (!isSnackBarShown) {
+                  showSnackBar(context, msg,icon: Icon(Icons.error,color: Colors.red.shade400,));
+                  isSnackBarShown = true;
+                }
+                return widget.failurePage;
               }
             } else {
-              return failurePage;
+              return widget.failurePage;
             }
           } else {
-            return failurePage;
+            return widget.failurePage;
           }
         });
   }

@@ -71,50 +71,7 @@ Animation<double> snackBarAnimation(BuildContext context) {
   );
 }
 
-List snackBarContexts = [];
-List snackBarMessages = [];
-Map snackBarActions = {};
-bool isRunning = false;
-
-showSnackBar(BuildContext context, String message,
-    {double duration = 1,
-    Icon icon = const Icon(
-      Icons.check,
-      color: Colors.white,
-    )}) {
-  snackBarContexts.add(context);
-  snackBarMessages.add(message);
-  snackBarActions[context] = [duration, icon];
-
-  if (!isRunning) {
-    while (true) {
-      if (snackBarContexts.isNotEmpty) {
-        isRunning = true;
-        var itemContext = snackBarContexts.first;
-        var itemMessage = snackBarMessages.first;
-        var itemAction = snackBarActions[itemContext];
-        // remove item from list
-        snackBarContexts.removeAt(0);
-        snackBarMessages.removeAt(0);
-        snackBarActions.remove(itemContext);
-
-        Future.delayed(const Duration(milliseconds: 500), () {
-          showSnackBarOne(itemContext, itemMessage,
-              duration: itemAction[0], icon: itemAction[1]);
-        });
-      } else {
-        isRunning = false;
-        break;
-      }
-    }
-  }
-}
-  
-
-
-
-
-showSnackBarOne(BuildContext context, String msg,
+showSnackBar(BuildContext context, String msg,
     {double duration = 1,
     Icon icon = const Icon(
       Icons.check,
@@ -122,30 +79,30 @@ showSnackBarOne(BuildContext context, String msg,
     )}) {
   // convert duration to to milliseconds
   int milliseconds = (duration * 1000).toInt();
-
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      animation: snackBarAnimation(context),
-      action: SnackBarAction(
-        label: 'Hide',
-        onPressed: () {
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        },
-      ),
-      content: Row(
-        children: [
-          SizedBox(width: MediaQuery.of(context).size.width * 0.1, child: icon),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.45,
-            child: MyText(
-              text: msg,
-              fontSize: 12,
-            ),
-          ),
-        ],
-      ),
-      duration: Duration(milliseconds: milliseconds),
+  var snackBar = SnackBar(
+    animation: snackBarAnimation(context),
+    action: SnackBarAction(
+      label: 'Hide',
+      onPressed: () {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      },
     ),
+    content: Row(
+      children: [
+        SizedBox(width: MediaQuery.of(context).size.width * 0.1, child: icon),
+        const SizedBox(width: 10),
+        SizedBox(
+          width: MediaQuery.of(context).size.width * 0.45,
+          child: MyText(
+            text: msg,
+            fontSize: 12,
+          ),
+        ),
+      ],
+    ),
+    duration: Duration(milliseconds: milliseconds),
   );
+
+  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
