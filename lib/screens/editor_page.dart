@@ -233,7 +233,6 @@ class UserPage extends StatelessWidget {
           } else {
             List<User> users = snapshot.data!;
             List<double> totalUsageAndAmount = allUseresUsages(users);
-
             return Column(
               children: [
                 Padding(
@@ -243,13 +242,16 @@ class UserPage extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        MyText(text: "Total Usage:"),
+                        MyText(text: "Total Usage:", fontSize: 12),
                         MyText(
                           text: totalUsageAndAmount[0].toStringAsFixed(2),
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                         ),
-                        MyText(text: "Total Amount:"),
+                        MyText(
+                          text: "Total Amount:",
+                          fontSize: 12,
+                        ),
                         MyText(
                           text: totalUsageAndAmount[1].toStringAsFixed(2),
                           fontSize: 14,

@@ -93,11 +93,15 @@ showSnackBar(BuildContext context, String msg,
         ),
         content: Row(
           children: [
-            icon,
+            SizedBox(
+                child: icon, width: MediaQuery.of(context).size.width * 0.1),
             SizedBox(width: 10),
             SizedBox(
-              width: MediaQuery.of(context).size.width * 0.52,
-              child: MyText(text: msg),
+              width: MediaQuery.of(context).size.width * 0.45,
+              child: MyText(
+                text: msg,
+                fontSize: 12,
+              ),
             ),
           ],
         ),

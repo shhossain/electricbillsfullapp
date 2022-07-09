@@ -13,7 +13,7 @@ import 'package:electricbills/widgets/text_field.dart';
 import 'package:electricbills/widgets/texts.dart';
 import 'package:flutter/material.dart';
 
-class ShowWaterBill extends StatelessWidget {
+class ShowWaterBill extends StatefulWidget {
   final User user;
   final String month;
   final String year;
@@ -22,10 +22,30 @@ class ShowWaterBill extends StatelessWidget {
       : super(key: key);
 
   @override
+  State<ShowWaterBill> createState() => _ShowWaterBillState();
+}
+
+class _ShowWaterBillState extends State<ShowWaterBill> {
+  late Future<List<User>> _futureWaterBill;
+
+  @override
+  void initState() {
+    Users users = Users(user: widget.user);
+    _futureWaterBill = users.getUsersWaterBillsDate(widget.month, widget.year);
+    super.initState();
+  }
+
+  refreshFuture() {
+    setState(() {
+      _futureWaterBill = Users(user: widget.user)
+          .getUsersWaterBillsDate(widget.month, widget.year);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    Users users = Users(user: user);
     return FutureBuilder(
-      future: users.getUsersWaterBillsDate(month, year),
+      future: _futureWaterBill,
       builder: (context, AsyncSnapshot<List<User>> snapshot) {
         ConnectionState connectionState = snapshot.connectionState;
         if (connectionState == ConnectionState.waiting) {
@@ -35,10 +55,12 @@ class ShowWaterBill extends StatelessWidget {
         } else if (connectionState == ConnectionState.done) {
           List<User> users = snapshot.data!;
           return UserWaterBills(
-            editUser: user,
+            editUser: widget.user,
             users: users,
-            month: month,
-            year: year,
+            month: widget.month,
+            year: widget.year,
+            refreshFuture: refreshFuture,
+            parentContext: context,
           );
         } else {
           return Center(
@@ -57,12 +79,16 @@ class UserWaterBills extends StatefulWidget {
     required this.editUser,
     required this.month,
     required this.year,
+    required this.refreshFuture,
+    required this.parentContext,
   }) : super(key: key);
 
   final List<User> users;
   final User editUser;
   final String month;
   final String year;
+  final dynamic refreshFuture;
+  final BuildContext parentContext;
 
   @override
   State<UserWaterBills> createState() => _UserWaterBillsState();
@@ -73,11 +99,12 @@ class _UserWaterBillsState extends State<UserWaterBills> {
   final TextEditingController _totalBillController = TextEditingController();
   bool edit = false;
   bool isLoading = false;
+  double initialTotalBill = 0;
 
   @override
   void initState() {
-    super.initState();
     setTotalBill();
+    super.initState();
   }
 
   setTotalBill() async {
@@ -85,12 +112,16 @@ class _UserWaterBillsState extends State<UserWaterBills> {
     var res = await users.totalWaterBill(widget.month, widget.year);
     setState(() {
       if (res[0]) {
-        totalBill = res[1];
+        totalBill = res[1].toString();
       } else {
         totalBill = '0';
       }
     });
     _totalBillController.text = parseDouble(totalBill).toStringAsFixed(2);
+
+    setState(() {
+      initialTotalBill = parseDouble(totalBill);
+    });
   }
 
   @override
@@ -101,7 +132,8 @@ class _UserWaterBillsState extends State<UserWaterBills> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             MyText(
-              text: 'Total',
+              text: 'Total:',
+              fontSize: 12,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -121,9 +153,17 @@ class _UserWaterBillsState extends State<UserWaterBills> {
                               enabled: edit,
                             ),
                             controller: _totalBillController,
+                            onChanged: (value) {
+                              if (value.isNotEmpty) {
+                                setState(() {
+                                  totalBill = value;
+                                });
+                              }
+                            },
                           )
                         : MyText(
-                            text: _totalBillController.text,
+                            text: initialTotalBill.toStringAsFixed(2),
+                            fontWeight: FontWeight.bold,
                           ),
                   ),
                 ),
@@ -138,10 +178,6 @@ class _UserWaterBillsState extends State<UserWaterBills> {
                             double total =
                                 parseDouble(_totalBillController.text);
 
-                            if (total == totalBill) {
-                              return;
-                            }
-                            print('total: $total totalBill: $totalBill');
 
                             Users users = Users(user: widget.editUser);
                             String month = widget.month;
@@ -154,7 +190,16 @@ class _UserWaterBillsState extends State<UserWaterBills> {
                             var res = await users.AddWaterBillFromTotal(
                                 month, year, total);
                             bool success = res[0];
-                            showSnackBar(context, res[1],
+
+                            if (success) {
+                              setState(() {
+                                initialTotalBill = total;
+                                totalBill = total.toString();
+                              });
+                              widget.refreshFuture();
+                            }
+
+                            showSnackBar(widget.parentContext, res[1],
                                 icon: Icon(
                                     success
                                         ? Icons.check_circle_outline
