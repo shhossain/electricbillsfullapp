@@ -10,8 +10,34 @@ on:
 # on: push    # Default will running for every branch.
     
 jobs:
+  buildWeb:
+    name: Build Web And Test
+    env:
+      my_secret: ${{secrets.commit_secret}}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+      - run: flutter pub get
+      - run: flutter test
+      - run: flutter build web --release
+      - run: |
+          cd build/web
+          git init
+          git config --global user.email hossain0338@gmail.com
+          git config --global user.name shhossain
+          git status
+          git remote add origin https://${{secrets.commit_secret}}@github.com/shhossain/billsapp.git
+          git checkout -b gh-pages
+          git add --all
+          git commit -m "${{ github.event.head_commit.message }}"
+          git push origin gh-pages -f
+
   buildApk:
     name: Build Apk
+    needs: [buildWeb]
     # This job will run on ubuntu virtual machine
     runs-on: ubuntu-latest
     steps:
@@ -48,26 +74,4 @@ jobs:
         name: release-apk
         path: build/app/outputs/apk/release/app-release.apk
   
-  buildWeb:
-    name: Build Web
-    env:
-      my_secret: ${{secrets.commit_secret}}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-      - run: flutter pub get
-      - run: flutter build web --release
-      - run: |
-          cd build/web
-          git init
-          git config --global user.email hossain0338@gmail.com
-          git config --global user.name shhossain
-          git status
-          git remote add origin https://${{secrets.commit_secret}}@github.com/shhossain/billsapp.git
-          git checkout -b gh-pages
-          git add --all
-          git commit -m "${{ github.event.head_commit.message }}"
-          git push origin gh-pages -f
+  
