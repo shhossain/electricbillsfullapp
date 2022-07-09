@@ -194,7 +194,7 @@ class ViewBills extends StatelessWidget {
                     label: ListTile(
                       title: Text(bills[index].stringMonth),
                       subtitle: Text(bills[index].year.toString()),
-                      trailing: Text(bills[index].amount.toString()),
+                      trailing: Text(bills[index].amount.toStringAsFixed(2)),
                     ),
                   ),
                 );
@@ -226,7 +226,7 @@ class ViewBills extends StatelessWidget {
                       title: Text(bills[index].stringMonth),
                       subtitle: Text(bills[index].year.toString()),
                       trailing: Text(
-                          "${bills[index].totalUsage} X ${bills[index].unitPrice} = ${bills[index].totalAmmount}"),
+                          "${bills[index].totalUsage} X ${bills[index].unitPrice} = ${bills[index].totalAmmount.toStringAsFixed(2)}"),
                     ),
                   ),
                 );

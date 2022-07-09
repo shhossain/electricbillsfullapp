@@ -50,11 +50,10 @@ openFile(String path) async {
 }
 
 void printf(dynamic value) {
-    if (kDebugMode) {
-      // ignore: avoid_print
-      print(value);
-    }
-
+  if (kDebugMode) {
+    // ignore: avoid_print
+    print(value);
+  }
 }
 
 Animation<double> snackBarAnimation(BuildContext context) {
@@ -72,6 +71,14 @@ Animation<double> snackBarAnimation(BuildContext context) {
   );
 }
 
+getUniqueId(BuildContext context) {
+  // get a unique id from the context
+  var key = GlobalKey(debugLabel: context.hashCode.toString());
+  return key.currentContext.hashCode.toString();
+}
+
+List snackBars = [];
+
 showSnackBar(BuildContext context, String msg,
     {double duration = 1,
     Icon icon = const Icon(
@@ -81,35 +88,37 @@ showSnackBar(BuildContext context, String msg,
   // convert duration to to milliseconds
   int milliseconds = (duration * 1000).toInt();
 
-  // snackbar animation
+  var uniqueId = getUniqueId(context);
 
-  Future.delayed(Duration.zero, () {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        animation: snackBarAnimation(context),
-        action: SnackBarAction(
-          label: 'Hide',
-          onPressed: () {
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          },
-        ),
-        content: Row(
-          children: [
-            SizedBox(
-                width: MediaQuery.of(context).size.width * 0.1,
-                child: icon),
-            const SizedBox(width: 10),
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.45,
-              child: MyText(
-                text: msg,
-                fontSize: 12,
+  if (!snackBars.contains(uniqueId)) {
+    Future.delayed(Duration.zero, () {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          animation: snackBarAnimation(context),
+          action: SnackBarAction(
+            label: 'Hide',
+            onPressed: () {
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            },
+          ),
+          content: Row(
+            children: [
+              SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.1, child: icon),
+              const SizedBox(width: 10),
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.45,
+                child: MyText(
+                  text: msg,
+                  fontSize: 12,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
+          duration: Duration(milliseconds: milliseconds),
         ),
-        duration: Duration(milliseconds: milliseconds),
-      ),
-    );
-  });
+      );
+      snackBars.add(uniqueId);
+    });
+  }
 }

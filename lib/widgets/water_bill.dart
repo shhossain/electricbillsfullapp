@@ -392,7 +392,7 @@ class _ViewUserWaterBillTileState extends State<ViewUserWaterBillTile> {
               title: Text(widget.waterBill.stringMonth),
               subtitle: Text(widget.waterBill.year.toString()),
               trailing: !edit
-                  ? Text(widget.waterBill.amount.toString())
+                  ? Text(widget.waterBill.amount.toStringAsFixed(2))
                   : Container(
                       padding: const EdgeInsets.only(top: 10),
                       width: MediaQuery.of(context).size.width * 0.4,
@@ -482,7 +482,8 @@ class _AddWaterBillState extends State<AddWaterBill> {
     _years = List.generate(20, (i) => (currentDate.year - 10 + i).toString());
 
     if (widget.waterBill != null) {
-      _amountController.text = widget.waterBill?.amount.toString() ?? '0';
+      _amountController.text =
+          widget.waterBill?.amount.toStringAsFixed(2) ?? '0';
       _monthController.text =
           widget.waterBill?.stringMonth ?? currentDate.month.toString();
       _yearController.text =
