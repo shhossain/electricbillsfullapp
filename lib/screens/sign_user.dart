@@ -175,8 +175,8 @@ class _UserSignState extends State<UserSign> {
     if (savedUser != null) {
       User saveUser = savedUser;
       widget.usenameController.text = saveUser.username;
-      widget.passwordController.text = saveUser.password;
-      widget.housenameController.text = saveUser.housename;
+      widget.passwordController.text = saveUser.passWord;
+      widget.housenameController.text = saveUser.houseName;
 
       if (saveUser.email != null) {
         if (widget.emailController != null) {

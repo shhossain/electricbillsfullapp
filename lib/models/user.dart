@@ -5,9 +5,9 @@ import 'package:electricbills/api/request.dart';
 
 class User {
   final String username;
-  final String password;
-  final String housename;
-  final String role;
+  final String? password;
+  final String? housename;
+  final String? role;
   final String? email;
   final List<Bill>? bills;
   WaterBill? waterBill;
@@ -16,11 +16,16 @@ class User {
   double? previousMonthUnit;
   double? extraUnit;
 
+  get userName => username;
+  get passWord => password ?? '';
+  get houseName => housename ?? '';
+  get roleName => role ?? '';
+
   User(
       {required this.username,
-      required this.password,
-      required this.housename,
-      required this.role,
+      this.password,
+      this.housename,
+      this.role,
       this.email,
       this.bills,
       this.waterBill,
@@ -32,20 +37,41 @@ class User {
   Map<String, String> toJson() {
     Map<String, String> result = {};
     result["username"] = username;
-    result["password"] = password;
-    result["housename"] = housename;
-    result["role"] = role;
+    result["password"] = passWord;
+    result["housename"] = houseName;
+    result["role"] = roleName;
     result["email"] = email ?? "";
     return result;
   }
 
-  factory User.fromJson(Map<String, dynamic> json) {
+  factory User.fromWaterBill(WaterBill waterBill) {
+    var name = waterBill.name;
+    String username = name.split('-')[0];
+    String housename = name.split('-')[1];
     return User(
-        username: json["username"].toString(),
-        password: json["password"].toString(),
-        housename: json["housename"].toString(),
-        role: json["role"].toString(),
-        email: json["email"].toString());
+      username: username.toString(),
+      housename: housename.toString(),
+      waterBill: waterBill,
+    );
+  }
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    WaterBill waterbill = WaterBill.tryFromJson(json["water_bill"]);
+    var wbill;
+    if (waterbill.year == 0) {
+      wbill = null;
+    } else {
+      wbill = waterbill;
+    }
+
+    return User(
+      username: json["username"].toString(),
+      password: json["password"].toString(),
+      housename: json["housename"].toString(),
+      role: json["role"].toString(),
+      email: json["email"].toString(),
+      waterBill: wbill,
+    );
   }
 
   get extraUnits => extraUnit ?? 0;

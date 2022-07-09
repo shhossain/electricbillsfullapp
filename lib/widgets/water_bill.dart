@@ -5,8 +5,6 @@ import 'package:electricbills/helper/helper_func.dart';
 import 'package:electricbills/models/bill.dart';
 import 'package:electricbills/models/date.dart';
 import 'package:electricbills/models/user.dart';
-import 'package:electricbills/screens/editor_page.dart';
-import 'package:electricbills/screens/loading.dart';
 import 'package:electricbills/widgets/appbar.dart';
 import 'package:electricbills/widgets/buttons.dart';
 import 'package:electricbills/widgets/goto.dart';
@@ -74,6 +72,7 @@ class _UserWaterBillsState extends State<UserWaterBills> {
   String? totalBill;
   final TextEditingController _totalBillController = TextEditingController();
   bool edit = false;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -86,12 +85,12 @@ class _UserWaterBillsState extends State<UserWaterBills> {
     var res = await users.totalWaterBill(widget.month, widget.year);
     setState(() {
       if (res[0]) {
-        totalBill = res[1].toString();
+        totalBill = res[1];
       } else {
         totalBill = '0';
       }
     });
-    _totalBillController.text = totalBill.toString();
+    _totalBillController.text = parseDouble(totalBill).toStringAsFixed(2);
   }
 
   @override
@@ -108,61 +107,71 @@ class _UserWaterBillsState extends State<UserWaterBills> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
+                  padding: EdgeInsets.only(bottom: !edit ? 0 : 8),
                   child: AnimatedContainer(
                     duration: Duration(milliseconds: 500),
-                    width: !edit ? 50 : 80,
+                    width: !edit ? 80 : 120,
                     height: 20,
                     // remove border
-                    child: TextField(
-                      // autofocus: false,
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        enabled: edit,
-                      ),
-                      controller: _totalBillController,
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) {
-                        setState(() {
-                          totalBill = value;
-                        });
-                      },
-                    ),
+                    child: edit
+                        ? TextField(
+                            autofocus: true,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              enabled: edit,
+                            ),
+                            controller: _totalBillController,
+                          )
+                        : MyText(
+                            text: _totalBillController.text,
+                          ),
                   ),
                 ),
-                IconButton(
-                  icon: Icon(
-                    !edit ? Icons.edit_outlined : Icons.check_outlined,
-                    size: 20,
-                  ),
-                  onPressed: () {
-                    if (edit) {
-                      Users users = Users(user: widget.editUser);
-                      String month = widget.month;
-                      String year = widget.year;
-                      double total = parseDouble(_totalBillController.text);
-
-                      goto(
-                        context,
-                        LoadingPage(
-                          future:
-                              users.AddWaterBillFromTotal(month, year, total),
-                          successPage: EditorPage(
-                            user: widget.editUser,
-                            selectedBill: 'water',
-                          ),
-                          failurePage: EditorPage(
-                            user: widget.editUser,
-                            selectedBill: 'water',
-                          ),
+                !isLoading
+                    ? IconButton(
+                        icon: Icon(
+                          !edit ? Icons.edit_outlined : Icons.check_outlined,
+                          size: 20,
                         ),
-                      );
-                    }
-                    setState(() {
-                      edit = !edit;
-                    });
-                  },
-                ),
+                        onPressed: () async {
+                          if (edit) {
+                            double total =
+                                parseDouble(_totalBillController.text);
+
+                            if (total == totalBill) {
+                              return;
+                            }
+                            print('total: $total totalBill: $totalBill');
+
+                            Users users = Users(user: widget.editUser);
+                            String month = widget.month;
+                            String year = widget.year;
+
+                            setState(() {
+                              isLoading = true;
+                            });
+
+                            var res = await users.AddWaterBillFromTotal(
+                                month, year, total);
+                            bool success = res[0];
+                            showSnackBar(context, res[1],
+                                icon: Icon(
+                                    success
+                                        ? Icons.check_circle_outline
+                                        : Icons.error_outline,
+                                    color:
+                                        success ? Colors.green : Colors.red));
+
+                            setState(() {
+                              isLoading = false;
+                            });
+                          }
+                          setState(() {
+                            edit = !edit;
+                          });
+                        },
+                      )
+                    : CircularProgressIndicator(),
               ],
             ),
           ],
@@ -199,8 +208,9 @@ class _UserWaterBillsState extends State<UserWaterBills> {
                         label: ListTile(
                           title: Text(cuser.username),
                           // subtitle: Text(cuser.role),
-                          trailing:
-                              Text(cuser.waterBill?.amount.toString() ?? '0'),
+                          trailing: Text(
+                              cuser.waterBill?.amount.toStringAsFixed(2) ??
+                                  '0'),
                         ),
                       ),
                     ),

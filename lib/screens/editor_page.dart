@@ -938,8 +938,8 @@ class _AddUserState extends State<AddUser> {
     if (currentAddUser != null) {
       var user = currentAddUser!;
       _usernameController.text = user.username;
-      _passwordController.text = user.password;
-      _roleController.text = user.role;
+      _passwordController.text = user.passWord;
+      _roleController.text = user.roleName;
     }
 
     if (addUserWaringMsg != null) {

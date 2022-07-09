@@ -10,7 +10,7 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return user.role.toLowerCase() == 'editor'
+    return user.roleName.toLowerCase() == 'editor'
         ? EditorPage(
             user: user,
           )

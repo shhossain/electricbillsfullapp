@@ -8,6 +8,7 @@ import 'package:electricbills/screens/home.dart';
 import 'package:electricbills/screens/loading.dart';
 import 'package:electricbills/screens/sign_user.dart';
 import 'package:electricbills/widgets/goto.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
@@ -54,14 +55,19 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<bool> isinternet() async {
-    try {
-      final result = await InternetAddress.lookup('google.com');
-      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        return true;
+    if (!kIsWeb) {
+      try {
+        final result = await InternetAddress.lookup('google.com');
+        if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+          return true;
+        }
+      } on SocketException catch (_) {
+        return false;
       }
-    } on SocketException catch (_) {
-      return false;
+    } else {
+      return true;
     }
+
     return false;
   }
 
@@ -94,9 +100,9 @@ class _LoginPageState extends State<LoginPage> {
       if (currentUser != null) {
         var user = currentUser!;
         usenameController.text = user.username;
-        passwordController.text = user.password;
-        housenameController.text = user.housename;
-        roleController.text = user.role;
+        passwordController.text = user.passWord;
+        housenameController.text = user.houseName;
+        roleController.text = user.roleName;
       }
     }
 

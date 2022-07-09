@@ -4,7 +4,6 @@ import 'package:electricbills/helper/helper_func.dart';
 import 'package:electricbills/models/bill.dart';
 import 'package:electricbills/models/user.dart';
 
-
 class Users {
   final User user;
   Users({required this.user});
@@ -24,7 +23,7 @@ class Users {
   };
 
   Future<List<User>> getUsers() async {
-    if (user.role.toLowerCase() == 'editor') {
+    if (user.roleName.toLowerCase() == 'editor') {
       String url = "$apiUrl/api/users";
       var body = user.toJson();
       body['action'] = 'get_users';
@@ -47,12 +46,12 @@ class Users {
   addUserEditor(User addUser) async {
     Map<String, String> body = {
       'editor_username': user.username,
-      'editor_password': user.password,
-      'editor_housename': user.housename,
+      'editor_password': user.passWord,
+      'editor_housename': user.houseName,
       'add_username': addUser.username,
-      'add_password': addUser.password,
-      'add_housename': addUser.housename,
-      'add_role': addUser.role,
+      'add_password': addUser.passWord,
+      'add_housename': addUser.houseName,
+      'add_role': addUser.roleName,
     };
 
     String url = "$apiUrl/api/user/editor";
@@ -69,9 +68,9 @@ class Users {
       double prevMonthUnit, double usedUnit) async {
     Map<String, String> body = {
       'username': addUser.username,
-      'password': addUser.password,
-      'housename': addUser.housename,
-      'role': addUser.role,
+      'password': addUser.passWord,
+      'housename': addUser.houseName,
+      'role': addUser.roleName,
       'month': months[month].toString(),
       'year': year.toString(),
       'day': day.toString(),
@@ -80,8 +79,8 @@ class Users {
       'total_amount': totalAmmount.toString(),
       'extra_unit': addUser.extraUnit.toString(),
       'editor_username': user.username,
-      'editor_password': user.password,
-      'editor_housename': user.housename,
+      'editor_password': user.passWord,
+      'editor_housename': user.houseName,
       'action': 'add_unit',
     };
 
@@ -100,15 +99,15 @@ class Users {
   getPrevUnit(User addUser, String month, int year, int day) async {
     Map<String, String> body = {
       'username': addUser.username,
-      'password': addUser.password,
-      'housename': addUser.housename,
-      'role': addUser.role,
+      'password': addUser.passWord,
+      'housename': addUser.houseName,
+      'role': addUser.roleName,
       'month': months[month].toString(),
       'year': year.toString(),
       'day': day.toString(),
       'editor_username': user.username,
-      'editor_password': user.password,
-      'editor_housename': user.housename,
+      'editor_password': user.passWord,
+      'editor_housename': user.houseName,
       'action': 'prev_units',
     };
     String url = "$apiUrl/api/unit/get";
@@ -125,9 +124,9 @@ class Users {
       double prevMonthUnit, double usedUnit) async {
     Map<String, String> body = {
       'username': addUser.username,
-      'password': addUser.password,
-      'housename': addUser.housename,
-      'role': addUser.role,
+      'password': addUser.passWord,
+      'housename': addUser.houseName,
+      'role': addUser.roleName,
       'month': months[month].toString(),
       'year': year.toString(),
       'day': day.toString(),
@@ -136,8 +135,8 @@ class Users {
       'total_amount': totalAmmount.toString(),
       'extra_unit': addUser.extraUnit.toString(),
       'editor_username': user.username,
-      'editor_password': user.password,
-      'editor_housename': user.housename,
+      'editor_password': user.passWord,
+      'editor_housename': user.houseName,
       'prev_month_unit': prevMonthUnit.toString(),
       'used_unit': usedUnit.toString(),
     };
@@ -154,15 +153,15 @@ class Users {
   getUnitDataByDate(User addUser, String month, int year, int day) async {
     Map<String, String> body = {
       'username': addUser.username,
-      'password': addUser.password,
-      'housename': addUser.housename,
-      'role': addUser.role,
+      'password': addUser.passWord,
+      'housename': addUser.houseName,
+      'role': addUser.roleName,
       'month': months[month].toString(),
       'year': year.toString(),
       'day': day.toString(),
       'editor_username': user.username,
-      'editor_password': user.password,
-      'editor_housename': user.housename,
+      'editor_password': user.passWord,
+      'editor_housename': user.houseName,
       'action': 'get_units_date',
     };
     String url = "$apiUrl/api/unit/get";
@@ -221,9 +220,9 @@ class Users {
           bills.where((bill) => bill.name.contains(user.username)).toList();
       User newUser = User(
         username: user.username,
-        password: user.password,
-        housename: user.housename,
-        role: user.role,
+        password: user.passWord,
+        housename: user.houseName,
+        role: user.roleName,
         totalUnit: user.totalUnit,
         unitPrice: user.unitPrice,
         bills: userBills,
@@ -237,8 +236,8 @@ class Users {
     var body = deleteUser.toJson();
     body['action'] = 'delete_user';
     body['editor_username'] = user.username;
-    body['editor_password'] = user.password;
-    body['editor_housename'] = user.housename;
+    body['editor_password'] = user.passWord;
+    body['editor_housename'] = user.houseName;
     String url = "$apiUrl/api/user/delete";
     var response = await requests.post(url: url, body: body);
     var jsonData = jsonDecodeAny(response.body);
@@ -256,8 +255,8 @@ class Users {
     body['year'] = year;
     body['day'] = day;
     body['editor_username'] = user.username;
-    body['editor_password'] = user.password;
-    body['editor_housename'] = user.housename;
+    body['editor_password'] = user.passWord;
+    body['editor_housename'] = user.houseName;
     String url = "$apiUrl/api/bill/delete";
     var response = await requests.post(url: url, body: body);
     var jsonData = jsonDecodeAny(response.body);
@@ -271,9 +270,9 @@ class Users {
   editBill(User editUser, int month, String year, String day) async {
     Map<String, String> body = {
       'username': editUser.username,
-      'password': editUser.password,
-      'housename': editUser.housename,
-      'role': editUser.role,
+      'password': editUser.passWord,
+      'housename': editUser.houseName,
+      'role': editUser.roleName,
       'month': month.toString(),
       'year': year.toString(),
       'day': day.toString(),
@@ -282,8 +281,8 @@ class Users {
       'total_amount': editUser.totalAmount.toString(),
       'extra_unit': editUser.extraUnit.toString(),
       'editor_username': user.username,
-      'editor_password': user.password,
-      'editor_housename': user.housename,
+      'editor_password': user.passWord,
+      'editor_housename': user.houseName,
       'prev_month_unit': editUser.previousMonthUnit.toString(),
       'used_unit': editUser.monthlyUsedUnits.toString(),
     };
@@ -297,20 +296,19 @@ class Users {
     return [false, jsonData['msg']];
   }
 
-
   addWaterBill(
       User addUser, String month, String year, double totalAmmount) async {
     Map<String, String> body = {
       'username': addUser.username,
-      'password': addUser.password,
-      'housename': addUser.housename,
-      'role': addUser.role,
+      'password': addUser.passWord,
+      'housename': addUser.houseName,
+      'role': addUser.roleName,
       'month': months[month].toString(),
       'year': year.toString(),
       'amount': totalAmmount.toString(),
       'editor_username': user.username,
-      'editor_password': user.password,
-      'editor_housename': user.housename,
+      'editor_password': user.passWord,
+      'editor_housename': user.houseName,
     };
     String url = "$apiUrl/api/water/add_water";
     var response = await requests.post(url: url, body: body);
@@ -326,15 +324,15 @@ class Users {
       double totalAmmount, double prevMonthUnit, double usedUnit) async {
     Map<String, String> body = {
       'username': editUser.username,
-      'password': editUser.password,
-      'housename': editUser.housename,
-      'role': editUser.role,
+      'password': editUser.passWord,
+      'housename': editUser.houseName,
+      'role': editUser.roleName,
       'month': months[month].toString(),
       'year': year.toString(),
       'amount': totalAmmount.toString(),
       'editor_username': user.username,
-      'editor_password': user.password,
-      'editor_housename': user.housename,
+      'editor_password': user.passWord,
+      'editor_housename': user.houseName,
     };
     String url = "$apiUrl/api/water/edit_bill";
     var response = await requests.post(url: url, body: body);
@@ -349,14 +347,14 @@ class Users {
   deleteWaterBill(User deleteUser, String month, int year) async {
     Map<String, String> body = {
       'username': deleteUser.username,
-      'password': deleteUser.password,
-      'housename': deleteUser.housename,
-      'role': deleteUser.role,
+      'password': deleteUser.passWord,
+      'housename': deleteUser.houseName,
+      'role': deleteUser.roleName,
       'month': months[month].toString(),
       'year': year.toString(),
       'editor_username': user.username,
-      'editor_password': user.password,
-      'editor_housename': user.housename,
+      'editor_password': user.passWord,
+      'editor_housename': user.houseName,
     };
     String url = "$apiUrl/api/water/delete_bill";
     var response = await requests.post(url: url, body: body);
@@ -371,14 +369,14 @@ class Users {
   getWaterBill(User getUser, String month, String year) async {
     Map<String, String> body = {
       'username': getUser.username,
-      'password': getUser.password,
-      'housename': getUser.housename,
-      'role': getUser.role,
+      'password': getUser.passWord,
+      'housename': getUser.houseName,
+      'role': getUser.roleName,
       'month': months[month].toString(),
       'year': year.toString(),
       'editor_username': user.username,
-      'editor_password': user.password,
-      'editor_housename': user.housename,
+      'editor_password': user.passWord,
+      'editor_housename': user.houseName,
     };
     String url = "$apiUrl/api/water/get_bill";
     var response = await requests.post(url: url, body: body);
@@ -393,12 +391,12 @@ class Users {
   getWaterBills(User getUser) async {
     Map<String, String> body = {
       'username': getUser.username,
-      'password': getUser.password,
-      'housename': getUser.housename,
-      'role': getUser.role,
+      'password': getUser.passWord,
+      'housename': getUser.houseName,
+      'role': getUser.roleName,
       'editor_username': user.username,
-      'editor_password': user.password,
-      'editor_housename': user.housename,
+      'editor_password': user.passWord,
+      'editor_housename': user.houseName,
     };
     String url = "$apiUrl/api/water/get_bills";
     var response = await requests.post(url: url, body: body);
@@ -413,14 +411,14 @@ class Users {
   getWaterBillsDate(User getUser, String month, String year) async {
     Map<String, String> body = {
       'username': getUser.username,
-      'password': getUser.password,
-      'housename': getUser.housename,
-      'role': getUser.role,
+      'password': getUser.passWord,
+      'housename': getUser.houseName,
+      'role': getUser.roleName,
       'month': months[month].toString(),
       'year': year.toString(),
       'editor_username': user.username,
-      'editor_password': user.password,
-      'editor_housename': user.housename,
+      'editor_password': user.passWord,
+      'editor_housename': user.houseName,
     };
     String url = "$apiUrl/api/water/get_bill_date";
     var response = await requests.post(url: url, body: body);
@@ -433,12 +431,21 @@ class Users {
   }
 
   Future<List<User>> getUsersWaterBillsDate(String month, String year) async {
-    List<User> users = await getUsers();
-    for (var user in users) {
-      var result = await getWaterBillsDate(user, month, year);
-      if (result[0]) {
-        WaterBill waterBill = WaterBill.fromJson(result[1]);
-        user.waterBill = waterBill;
+    var body = user.toJson();
+    body['month'] = months[month].toString();
+    body['year'] = year.toString();
+    body['editor_username'] = user.username;
+    body['editor_password'] = user.passWord;
+    body['editor_housename'] = user.houseName;
+    String url = "$apiUrl/api/water/get_users_water_bill";
+    var response = await requests.post(url: url, body: body);
+    var jsonData = jsonDecodeAny(response.body);
+    var success = jsonData['success'];
+    List<User> users = [];
+    if (success) {
+      var u = jsonData['msg'];
+      for (var user in u) {
+        users.add(User.fromJson(user));
       }
     }
     return users;
@@ -449,8 +456,8 @@ class Users {
     body['month'] = months[month].toString();
     body['year'] = year.toString();
     body['editor_username'] = user.username;
-    body['editor_password'] = user.password;
-    body['editor_housename'] = user.housename;
+    body['editor_password'] = user.passWord;
+    body['editor_housename'] = user.houseName;
 
     String url = "$apiUrl/api/water/total_bill";
     var response = await requests.post(url: url, body: body);
@@ -487,8 +494,7 @@ class Users {
     return [success, msg];
   }
 
-
-  getWaterBillForView(String month, String year){
+  getWaterBillForView(String month, String year) {
     var body = user.toJson();
     body['month'] = months[month].toString();
     body['year'] = year.toString();
@@ -503,7 +509,7 @@ class Users {
     return [false, jsonData['msg']];
   }
 
-  Future<List<WaterBill>> getWaterBillForViewAll() async{
+  Future<List<WaterBill>> getWaterBillForViewAll() async {
     var body = user.toJson();
     body['month'] = months[0].toString();
     body['year'] = '2000';

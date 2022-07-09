@@ -70,6 +70,13 @@ class WaterBill {
     );
   }
 
+  factory WaterBill.tryFromJson(Map<String, dynamic>? json) {
+    if (json == null) {
+      return WaterBill(name: 'null', year: 0, month: 0, amount: 0);
+    }
+    return WaterBill.fromJson(json);
+  }
+
   // to json
   Map<String, dynamic> toJson() {
     return {

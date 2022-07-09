@@ -273,82 +273,84 @@ class ViewBillData extends StatelessWidget {
 
     return Scaffold(
       appBar: viewAppBar(context),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          ListTile(
-            title: const MyText(text: "For"),
-            subtitle: MyText(text: user.username),
-            trailing: MyText(text: '${bill.stringMonth} ${bill.year}'),
-          ),
-          const MyText(
-            text: 'Electric Bill',
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-          ListTile(
-            title: const MyText(text: 'Meter Reading'),
-            trailing:
-                MyText(text: '${bill.totalUnits.toStringAsFixed(2)} units'),
-          ),
-          ListTile(
-            title: const MyText(text: 'Previous Reading'),
-            trailing: MyText(
-                text: '${bill.previousMonthUnits.toStringAsFixed(2)} units'),
-          ),
-          ListTile(
-            title: const MyText(text: 'Monthly Usage'),
-            trailing:
-                MyText(text: '${bill.usedUnits.toStringAsFixed(2)} units'),
-          ),
-          ListTile(
-            title: const MyText(text: 'Extra Usage'),
-            trailing:
-                MyText(text: '${bill.extraUnit.toStringAsFixed(2)} units'),
-          ),
-          ListTile(
-            title: const MyText(text: 'Total Usage'),
-            trailing:
-                MyText(text: '${bill.totalUsage.toStringAsFixed(2)} units'),
-          ),
-          ListTile(
-            title: const MyText(text: 'Unit Price'),
-            trailing: MyText(text: '${bill.unitPrice.toStringAsFixed(2)} \$'),
-          ),
-          ListTile(
-            title: const MyText(text: 'Monthly Bill'),
-            trailing:
-                MyText(text: '${bill.totalAmmount.toStringAsFixed(2)} \$'),
-          ),
-          const MyText(
-            text: 'Water Bill',
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-          ListTile(
-            title: const MyText(text: 'Total'),
-            trailing: MyText(
-                text:
-                    '${(wbill != null ? wbill.amount : 0).toStringAsFixed(2)} \$'),
-          ),
-          Container(
-            height: 1,
-            width: MediaQuery.of(context).size.width * .95,
-            color: Colors.black.withOpacity(0.5),
-          ),
-          ListTile(
-            title: const MyText(
-              text: "Total",
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            ListTile(
+              title: const MyText(text: "For"),
+              subtitle: MyText(text: user.username),
+              trailing: MyText(text: '${bill.stringMonth} ${bill.year}'),
             ),
-            trailing: MyText(
-              text: '${getTotal(wbill).toStringAsFixed(2)} \$',
-              fontWeight: FontWeight.bold,
+            const MyText(
+              text: 'Electric Bill',
               fontSize: 20,
+              fontWeight: FontWeight.bold,
             ),
-          )
-        ],
+            ListTile(
+              title: const MyText(text: 'Meter Reading'),
+              trailing:
+                  MyText(text: '${bill.totalUnits.toStringAsFixed(2)} units'),
+            ),
+            ListTile(
+              title: const MyText(text: 'Previous Reading'),
+              trailing: MyText(
+                  text: '${bill.previousMonthUnits.toStringAsFixed(2)} units'),
+            ),
+            ListTile(
+              title: const MyText(text: 'Monthly Usage'),
+              trailing:
+                  MyText(text: '${bill.usedUnits.toStringAsFixed(2)} units'),
+            ),
+            ListTile(
+              title: const MyText(text: 'Extra Usage'),
+              trailing:
+                  MyText(text: '${bill.extraUnit.toStringAsFixed(2)} units'),
+            ),
+            ListTile(
+              title: const MyText(text: 'Total Usage'),
+              trailing:
+                  MyText(text: '${bill.totalUsage.toStringAsFixed(2)} units'),
+            ),
+            ListTile(
+              title: const MyText(text: 'Unit Price'),
+              trailing: MyText(text: '${bill.unitPrice.toStringAsFixed(2)} \$'),
+            ),
+            ListTile(
+              title: const MyText(text: 'Monthly Bill'),
+              trailing:
+                  MyText(text: '${bill.totalAmmount.toStringAsFixed(2)} \$'),
+            ),
+            const MyText(
+              text: 'Water Bill',
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+            ListTile(
+              title: const MyText(text: 'Total'),
+              trailing: MyText(
+                  text:
+                      '${(wbill != null ? wbill.amount : 0).toStringAsFixed(2)} \$'),
+            ),
+            Container(
+              height: 1,
+              width: MediaQuery.of(context).size.width * .95,
+              color: Colors.black.withOpacity(0.5),
+            ),
+            ListTile(
+              title: const MyText(
+                text: "Total",
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+              trailing: MyText(
+                text: '${getTotal(wbill).toStringAsFixed(2)} \$',
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

@@ -96,9 +96,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
       if (currentUser != null) {
         var user = currentUser!;
         usenameController.text = user.username;
-        passwordController.text = user.password;
-        housenameController.text = user.housename;
-        roleController.text = user.role;
+        passwordController.text = user.passWord;
+        housenameController.text = user.houseName;
+        roleController.text = user.roleName;
         emailController.text = user.email ?? "";
       }
     }
