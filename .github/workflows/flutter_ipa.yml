@@ -36,7 +36,7 @@ jobs:
     # - run: flutter test
     
     # Build ipa.
-    - run: flutter build ipa --no-codesign
+    - run: flutter build ios --no-codesign
     
     # Upload generated apk to the artifacts.
     - uses: actions/upload-artifact@v3
