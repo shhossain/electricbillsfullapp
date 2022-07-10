@@ -7,26 +7,26 @@ on:
 
 jobs:
   buildIpa:
-  name: Build IPA
-  runs-on: macos-latest
-  steps:
-  - uses: actions/checkout@v3
-  - name: Flutter get
-  - uses: subosito/flutter-action@v2
-    with:
-      channel: 'stable'
+    name: Build IPA
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Flutter get
+    - uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
 
-  # Install your project's dependencies
-  - run: flutter pub get
+    # Install your project's dependencies
+    - run: flutter pub get
 
-  # Build and sign the ipa using a single flutter command
-  - name: Building IPA
-    run: flutter build ipa
-      
-  # Collect the file and upload as artifact         
-  - name: collect ipa artifacts
-    uses: actions/upload-artifact@v2
-    with:
-      name: release-ipa
-      # Path to the release files
-      path: build/ios/ipa/*.ipa
+    # Build and sign the ipa using a single flutter command
+    - name: Building IPA
+      run: flutter build ipa
+        
+    # Collect the file and upload as artifact         
+    - name: collect ipa artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: release-ipa
+        # Path to the release files
+        path: build/ios/ipa/*.ipa
