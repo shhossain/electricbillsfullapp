@@ -1,9 +1,12 @@
+// ignore_for_file: unused_local_variable
+
 import 'package:electricbills/api/sign_user.dart';
 import 'package:electricbills/api/user_methods.dart';
 import 'package:electricbills/models/user.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 testPrint(String testname, dynamic value) {
+  // ignore: avoid_print
   print('$testname: $value');
 }
 
