@@ -5,7 +5,7 @@ name: Flutter Build
 on:
   push:
     branches:
-    - main
+    - test
     
 # on: push    # Default will running for every branch.
     
