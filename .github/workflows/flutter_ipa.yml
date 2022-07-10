@@ -21,11 +21,11 @@ jobs:
 
       # Build and sign the ipa using a single flutter command
       - name: Building IPA
-        run: flutter build ipa
+      - run: flutter build ipa
           
       # Collect the file and upload as artifact         
       - name: collect ipa artifacts
-        uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v2
         with:
           name: release-ipa
           # Path to the release files
