@@ -1,32 +1,47 @@
-name: Flutter IPA Build
+name: Flutter Ipa
+
+# This workflow is triggered on pushes to the repository.
 
 on:
   push:
     branches:
     - main
-
+    
+# on: push    # Default will running for every branch.
+    
 jobs:
   buildIpa:
-    name: Build IPA
+    name: Build Ipa
+    # This job will run on ubuntu virtual machine
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Flutter get
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-
-      # Install your project's dependencies
-      - run: flutter pub get
-
-      # Build and sign the ipa using a single flutter command
-      - name: Building IPA
-      - run: flutter build ipa
-          
-      # Collect the file and upload as artifact         
-      - name: collect ipa artifacts
-      - uses: actions/upload-artifact@v2
-        with:
-          name: release-ipa
-          # Path to the release files
-          path: build/ios/ipa/*.ipa
+    - uses: actions/checkout@v3
+    
+    # Setup the flutter environment.
+    - uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable' # 'dev', 'alpha', default to: 'stable'
+        # flutter-version: '1.12.x' # you can also specify exact version of flutter
+    
+    # Get flutter dependencies.
+    - run: flutter pub get
+    
+    # # Check for any formatting issues in the code.
+    # - run: flutter format --set-exit-if-changed .
+    
+    # Statically analyze the Dart code for any errors.
+    - run: flutter analyze .
+    
+    # Run widget tests for our flutter project.
+    # - run: flutter test
+    
+    # Build ipa.
+    - run: flutter build ipa
+    
+    # Upload generated apk to the artifacts.
+    - uses: actions/upload-artifact@v1
+      with:
+        name: release-ipa
+        path: build/ios/ipa/*.ipa
+  
+  
