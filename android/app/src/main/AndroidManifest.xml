@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.billsapp">
+    package="me.safayat.mybill">
    <application
-        android:label="EBill"
+        android:label="My Bill"
         android:usesCleartextTraffic="true"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
