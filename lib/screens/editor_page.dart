@@ -1147,6 +1147,7 @@ class _ViewBillDataEditorState extends State<ViewBillDataEditor> {
   WaterBill? waterBill;
   String? _wbillTotal;
   String? _electriWaterTotal;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -1205,13 +1206,16 @@ class _ViewBillDataEditorState extends State<ViewBillDataEditor> {
   getTotal(WaterBill? wbill) {
     var wbillAmount = wbill?.amount ?? 0;
     var billAmount = widget.bill.totalAmmount;
+    if (parseDouble(monthlyBill) > 0) {
+      billAmount = parseDouble(monthlyBill);
+    }
     return wbillAmount + billAmount;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: viewAppBar(context),
+      appBar: editorAppBar(context),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -1373,13 +1377,35 @@ class _ViewBillDataEditorState extends State<ViewBillDataEditor> {
                 : Container(),
             isEdited
                 ? MyTextButton(
-                    label: const MyText(text: 'Save'),
-                    onPressed: () {
+                    label: FittedBox(
+                      child: Row(
+                        mainAxisAlignment: isLoading
+                            ? MainAxisAlignment.center
+                            : MainAxisAlignment.spaceEvenly,
+                        children: [
+                          const MyText(
+                            text: 'Save',
+                            fontSize: 15,
+                          ),
+                          isLoading
+                              ? AnimatedContainer(
+                                  duration: const Duration(milliseconds: 1000),
+                                  height: 15,
+                                  width: 15,
+                                  margin:
+                                      EdgeInsets.only(left: isLoading ? 10 : 0),
+                                  child: const CircularProgressIndicator())
+                              : Container(),
+                        ],
+                      ),
+                    ),
+                    onPressed: () async {
                       Users users = Users(user: widget.editorUser);
                       var month = widget.bill.month;
                       printf('month: $month');
                       var year = widget.bill.year;
                       var day = '1';
+                      var total = parseDouble(_wbillTotalController.text);
 
                       User editUser = User(
                         username: widget.user.username,
@@ -1392,24 +1418,60 @@ class _ViewBillDataEditorState extends State<ViewBillDataEditor> {
                         role: widget.user.role,
                       );
 
-                      goto(
-                        context,
-                        LoadingPage(
-                          future: users.editBill(
-                              editUser, month, year.toString(), day),
-                          successPage: ViewBills(
-                            editorUser: widget.editorUser,
-                            user: widget.user,
+                      setState(() {
+                        isLoading = true;
+                      });
+
+                      var result1 = await users.editBill(
+                          editUser, month, year.toString(), day);
+                      var result2 = await users.addWaterBill(editUser,
+                          widget.bill.stringMonth, year.toString(), total);
+
+                      setState(() {
+                        isLoading = false;
+                      });
+
+                      String msg1 = result1[1];
+                      String msg2 = result2[1];
+
+                      bool suc1 = result1[0];
+                      bool suc2 = result2[0];
+
+                      showSnackBar(msg1,
+                          icon: Icon(
+                            !suc1 ? Icons.error : Icons.check,
+                            color: !suc1
+                                ? Colors.red.shade400
+                                : Colors.green.shade400,
                           ),
-                          failurePage: ViewBillDataEditor(
-                            bill: widget.bill,
-                            user: widget.user,
-                            editorUser: widget.editorUser,
-                            appBar: widget.appBar,
-                            waterBills: widget.waterBills,
+                          context: context);
+                      showSnackBar(msg2,
+                          icon: Icon(
+                            !suc2 ? Icons.error : Icons.check,
+                            color: !suc2
+                                ? Colors.red.shade400
+                                : Colors.green.shade400,
                           ),
-                        ),
-                      );
+                          context: context);
+
+                      // goto(
+                      //   context,
+                      //   LoadingPage(
+                      //     future: users.editBill(
+                      //         editUser, month, year.toString(), day),
+                      //     successPage: ViewBills(
+                      //       editorUser: widget.editorUser,
+                      //       user: widget.user,
+                      //     ),
+                      //     failurePage: ViewBillDataEditor(
+                      //       bill: widget.bill,
+                      //       user: widget.user,
+                      //       editorUser: widget.editorUser,
+                      //       appBar: widget.appBar,
+                      //       waterBills: widget.waterBills,
+                      //     ),
+                      //   ),
+                      // );
                     },
                   )
                 : const SizedBox()
