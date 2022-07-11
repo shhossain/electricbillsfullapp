@@ -71,38 +71,48 @@ Animation<double> snackBarAnimation(BuildContext context) {
   );
 }
 
-showSnackBar(BuildContext context, String msg,
-    {double duration = 1,
+showSnackBar(String msg,
+    {BuildContext? context,
+    double duration = 1,
     Icon icon = const Icon(
       Icons.check,
       color: Colors.white,
     )}) {
-  // convert duration to to milliseconds
-  int milliseconds = (duration * 1000).toInt();
-  var snackBar = SnackBar(
-    animation: snackBarAnimation(context),
-    action: SnackBarAction(
-      label: 'Hide',
-      onPressed: () {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      },
-    ),
-    content: Row(
-      children: [
-        SizedBox(width: MediaQuery.of(context).size.width * 0.1, child: icon),
-        const SizedBox(width: 10),
-        SizedBox(
-          width: MediaQuery.of(context).size.width * 0.45,
-          child: MyText(
-            text: msg,
-            fontSize: 12,
-          ),
-        ),
-      ],
-    ),
-    duration: Duration(milliseconds: milliseconds),
-  );
+  context ??= snackbarKey.currentContext;
 
-  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  if (context != null) {
+    // convert duration to to milliseconds
+    int milliseconds = (duration * 1000).toInt();
+    var snackBar = SnackBar(
+      animation: snackBarAnimation(context),
+      action: SnackBarAction(
+        label: 'Hide',
+        onPressed: () {
+          ScaffoldMessenger.of(context!).hideCurrentSnackBar();
+        },
+      ),
+      content: Row(
+        children: [
+          SizedBox(width: MediaQuery.of(context).size.width * 0.1, child: icon),
+          const SizedBox(width: 10),
+          SizedBox(
+            width: MediaQuery.of(context).size.width * 0.45,
+            child: MyText(
+              text: msg,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+      duration: Duration(milliseconds: milliseconds),
+    );
+
+    snackbarKey.currentState?.hideCurrentSnackBar();
+    try {
+      snackbarKey.currentState?.showSnackBar(snackBar);
+    } catch (_) {
+      context = storeContext.first;
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(snackBar);
+    }
+  }
 }

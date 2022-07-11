@@ -201,13 +201,14 @@ class _UserWaterBillsState extends State<UserWaterBills> {
                               widget.refreshFuture();
                             }
 
-                            showSnackBar(widget.parentContext, res[1],
+                            showSnackBar(res[1],
                                 icon: Icon(
                                     success
                                         ? Icons.check_circle_outline
                                         : Icons.error_outline,
                                     color:
-                                        success ? Colors.green : Colors.red));
+                                        success ? Colors.green : Colors.red),
+                                context: context);
 
                             setState(() {
                               isLoading = false;
@@ -427,7 +428,6 @@ class _ViewUserWaterBillTileState extends State<ViewUserWaterBillTile> {
                                     widget.waterBill.stringMonth,
                                     widget.waterBill.year);
                                 showSnackBar(
-                                  context,
                                   result[1],
                                   icon: Icon(
                                     result[0]
@@ -437,6 +437,7 @@ class _ViewUserWaterBillTileState extends State<ViewUserWaterBillTile> {
                                         ? Colors.green.shade400
                                         : Colors.red.shade400,
                                   ),
+                                    context: context
                                 );
                                 if (result[0]) {
                                   setState(() {
@@ -571,8 +572,8 @@ class _AddWaterBillState extends State<AddWaterBill> {
                 String year = _yearController.text;
 
                 if (amount == 0) {
-                  showSnackBar(context, "Please enter amount",
-                      icon: Icon(Icons.error, color: Colors.red.shade400));
+                  showSnackBar("Please enter amount",
+                      icon: Icon(Icons.error, color: Colors.red.shade400),context: context);
                   return;
                 }
                 Users users = Users(user: widget.editorUser);
@@ -587,13 +588,13 @@ class _AddWaterBillState extends State<AddWaterBill> {
                   Navigator.pop(context);
                 }
                 showSnackBar(
-                  context,
                   result[1],
                   icon: Icon(
                     result[0] ? Icons.check_circle : Icons.error,
                     color:
                         result[0] ? Colors.green.shade400 : Colors.red.shade400,
                   ),
+                  context: context
                 );
 
                 // goto(
