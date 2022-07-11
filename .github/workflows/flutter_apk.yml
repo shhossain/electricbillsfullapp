@@ -23,7 +23,7 @@ jobs:
       - run: flutter test
 
   buildWeb:
-    name: Build Web And Test
+    name: Build Web
     needs: [test]
     env:
       my_secret: ${{secrets.commit_secret}}
