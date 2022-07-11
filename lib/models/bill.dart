@@ -56,7 +56,7 @@ class WaterBill {
   final String name;
   final int year;
   final int month;
-  final double amount;
+  double amount;
 
   WaterBill({required this.name, required this.year, required this.month, required this.amount});
 

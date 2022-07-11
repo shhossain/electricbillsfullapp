@@ -18,7 +18,8 @@ import 'package:flutter/material.dart';
 class EditorPage extends StatefulWidget {
   final User user;
   final String? selectedBill;
-  const EditorPage({Key? key, required this.user,this.selectedBill}) : super(key: key);
+  const EditorPage({Key? key, required this.user, this.selectedBill})
+      : super(key: key);
 
   @override
   State<EditorPage> createState() => _EditorPageState();
@@ -422,13 +423,25 @@ class ViewBills extends StatefulWidget {
 class _ViewBillsState extends State<ViewBills> {
   bool isDelete = false;
 
+  _getFullBill() async {
+    var result = [];
+    result.add(await widget.user.getBills());
+    Users users = Users(user: widget.user);
+    result.add(await users.getWaterBillForViewAll());
+    return result;
+  }
+
+  _getBills() {
+    return _getFullBill();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: editorAppBar(context),
       body: FutureBuilder(
-          future: widget.user.getBills(),
-          builder: (context, AsyncSnapshot<List<Bill>?> snapshot) {
+          future: _getBills(),
+          builder: (context, AsyncSnapshot snapshot) {
             ConnectionState connectionState = snapshot.connectionState;
             if (connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -436,8 +449,10 @@ class _ViewBillsState extends State<ViewBills> {
               if (snapshot.hasError) {
                 return Center(child: Text('Error: ${snapshot.error}'));
               } else {
-                List<Bill> bills = snapshot.data!;
-
+                List<Bill> bills = snapshot.data![0];
+                List<WaterBill> waterBills = snapshot.data![1];
+                // print('bills: ${bills.length}');
+                printf('water bills: ${waterBills.length}');
                 return Padding(
                   padding: EdgeInsets.all(kDefaultPadding),
                   child: Column(
@@ -455,7 +470,8 @@ class _ViewBillsState extends State<ViewBills> {
                           text: "Bills",
                           fontSize: 20,
                           fontWeight: FontWeight.bold),
-                      billData(bills.reversed.toList(), widget.user),
+                      billData(
+                          bills.reversed.toList(), widget.user, waterBills),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
@@ -488,7 +504,7 @@ class _ViewBillsState extends State<ViewBills> {
     );
   }
 
-  Widget billData(List<Bill> bills, User user) {
+  Widget billData(List<Bill> bills, User user, List<WaterBill> waterBills) {
     return Expanded(
       child: GestureDetector(
         onTap: () {
@@ -505,6 +521,7 @@ class _ViewBillsState extends State<ViewBills> {
                     bill: bills[index],
                     editorUser: widget.editorUser,
                     isDelete: isDelete,
+                    waterBills: waterBills,
                   );
                 },
               )
@@ -519,12 +536,14 @@ class ViewBill extends StatefulWidget {
   final User user;
   final User editorUser;
   final bool isDelete;
+  final List<WaterBill> waterBills;
   const ViewBill({
     Key? key,
     required this.bill,
     required this.user,
     required this.editorUser,
     required this.isDelete,
+    required this.waterBills,
   }) : super(key: key);
 
   @override
@@ -554,6 +573,7 @@ class _ViewBillState extends State<ViewBill> {
                     user: widget.user,
                     appBar: editorAppBar(context),
                     editorUser: widget.editorUser,
+                    waterBills: widget.waterBills,
                   ));
             } else {
               setState(() {
@@ -1079,18 +1099,20 @@ class _AddUserState extends State<AddUser> {
 }
 
 class ViewBillDataEditor extends StatefulWidget {
-  const ViewBillDataEditor(
-      {Key? key,
-      required this.bill,
-      required this.user,
-      required this.appBar,
-      required this.editorUser})
-      : super(key: key);
+  const ViewBillDataEditor({
+    Key? key,
+    required this.bill,
+    required this.user,
+    required this.appBar,
+    required this.editorUser,
+    required this.waterBills,
+  }) : super(key: key);
 
   final Bill bill;
   final User user;
   final User editorUser;
   final AppBar appBar;
+  final List<WaterBill> waterBills;
 
   @override
   State<ViewBillDataEditor> createState() => _ViewBillDataEditorState();
@@ -1103,12 +1125,14 @@ class _ViewBillDataEditorState extends State<ViewBillDataEditor> {
       TextEditingController();
   final TextEditingController _extraUsageController = TextEditingController();
   final TextEditingController _unitPriceController = TextEditingController();
+  final TextEditingController _wbillTotalController = TextEditingController();
 
   bool meterReadingEdit = false;
   bool previousReadingEdit = false;
   bool extraUsageEdit = false;
   bool unitPriceEdit = false;
   bool isEdited = false;
+  bool wbillTotalEdit = false;
   List? warnings;
 
   String _meterReading = '';
@@ -1120,9 +1144,19 @@ class _ViewBillDataEditorState extends State<ViewBillDataEditor> {
   String totalUsage = '';
   String monthlyBill = '';
 
+  WaterBill? waterBill;
+  String? _wbillTotal;
+  String? _electriWaterTotal;
+
   @override
   void initState() {
     super.initState();
+    waterBill = getMatchingWaterBill();
+    _wbillTotal =
+        (waterBill != null ? waterBill!.amount : 0).toStringAsFixed(2);
+    _electriWaterTotal = getTotal(waterBill).toStringAsFixed(2);
+
+    _wbillTotalController.text = waterBill?.amount.toStringAsFixed(2) ?? '0.00';
     _meterReadingController.text = widget.bill.totalUnits.toString();
     _previousReadingController.text = widget.bill.previousMonthUnits.toString();
     _extraUsageController.text = widget.bill.extraUnit.toString();
@@ -1145,6 +1179,7 @@ class _ViewBillDataEditorState extends State<ViewBillDataEditor> {
         .toStringAsFixed(2);
     monthlyBill =
         (parseDouble(totalUsage) * parseDouble(_unitPrice)).toStringAsFixed(2);
+    _electriWaterTotal = getTotal(waterBill).toStringAsFixed(2);
   }
 
   @override
@@ -1154,169 +1189,232 @@ class _ViewBillDataEditorState extends State<ViewBillDataEditor> {
     _previousReadingController.dispose();
     _extraUsageController.dispose();
     _unitPriceController.dispose();
+    _wbillTotalController.dispose();
+  }
+
+  getMatchingWaterBill() {
+    for (WaterBill wbill in widget.waterBills) {
+      if (wbill.month == widget.bill.month && wbill.year == widget.bill.year) {
+        printf('wbill: ${wbill.toJson()}');
+        return wbill;
+      }
+    }
+    return null;
+  }
+
+  getTotal(WaterBill? wbill) {
+    var wbillAmount = wbill?.amount ?? 0;
+    var billAmount = widget.bill.totalAmmount;
+    return wbillAmount + billAmount;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: viewAppBar(context),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const MyText(
-            text: 'Electric Bill',
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-          ListTile(
-            title: const MyText(text: "For"),
-            subtitle: MyText(text: widget.user.username),
-            trailing:
-                MyText(text: '${widget.bill.stringMonth} ${widget.bill.year}'),
-          ),
-          ListTile(
-            title: const MyText(text: 'Meter Reading'),
-            trailing: setEditInfo(
-                text: '$_meterReading units',
-                controller: _meterReadingController,
-                edit: meterReadingEdit,
-                onPressed: () {
-                  setState(() {
-                    meterReadingEdit = true;
-                  });
-                },
-                onPressed2: () {
-                  setState(() {
-                    meterReadingEdit = false;
-                    _meterReading = _meterReadingController.text;
-                    updateBill();
-                  });
-                }),
-          ),
-          ListTile(
-            title: const MyText(text: 'Previous Reading'),
-            trailing: setEditInfo(
-                text: '$_previousReading units',
-                controller: _previousReadingController,
-                edit: previousReadingEdit,
-                onPressed: () {
-                  setState(() {
-                    previousReadingEdit = true;
-                  });
-                },
-                onPressed2: () {
-                  setState(() {
-                    previousReadingEdit = false;
-                    _previousReading = _previousReadingController.text;
-                    updateBill();
-                  });
-                }),
-          ),
-          ListTile(
-            title: const MyText(text: 'Monthly Usage'),
-            trailing: MyText(text: '$monthlyUsage units'),
-          ),
-          ListTile(
-            title: const MyText(text: 'Extra Usage'),
-            trailing: setEditInfo(
-                text: '$_extraUsage units',
-                controller: _extraUsageController,
-                edit: extraUsageEdit,
-                onPressed: () {
-                  setState(() {
-                    extraUsageEdit = true;
-                  });
-                },
-                onPressed2: () {
-                  setState(() {
-                    extraUsageEdit = false;
-                    _extraUsage = _extraUsageController.text;
-                    updateBill();
-                  });
-                }),
-          ),
-          ListTile(
-            title: const MyText(text: 'Total Usage'),
-            trailing: MyText(text: '$totalUsage units'),
-          ),
-          ListTile(
-            title: const MyText(text: 'Unit Price'),
-            trailing: setEditInfo(
-                text: '$_unitPrice \$',
-                controller: _unitPriceController,
-                edit: unitPriceEdit,
-                onPressed: () {
-                  setState(() {
-                    unitPriceEdit = true;
-                  });
-                },
-                onPressed2: () {
-                  setState(() {
-                    unitPriceEdit = false;
-                    _unitPrice = _unitPriceController.text;
-                    updateBill();
-                  });
-                }),
-          ),
-          ListTile(
-            title: const MyText(text: 'Monthly Bill'),
-            trailing: MyText(text: '$monthlyBill \$'),
-          ),
-          warnings != null
-              ? Column(
-                  children: [
-                    for (var warning in warnings!)
-                      MyText(
-                        text: warning,
-                        textColor: Colors.red.withOpacity(.6),
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                  ],
-                )
-              : Container(),
-          isEdited
-              ? MyTextButton(
-                  label: const MyText(text: 'Save'),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            ListTile(
+              title: const MyText(text: "For"),
+              subtitle: MyText(text: widget.user.username),
+              trailing: MyText(
+                  text: '${widget.bill.stringMonth} ${widget.bill.year}'),
+            ),
+            const MyText(
+              text: 'Electric Bill',
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+            ListTile(
+              title: const MyText(text: 'Meter Reading'),
+              trailing: setEditInfo(
+                  text: '$_meterReading units',
+                  controller: _meterReadingController,
+                  edit: meterReadingEdit,
                   onPressed: () {
-                    Users users = Users(user: widget.editorUser);
-                    var month = widget.bill.month;
-                    printf('month: $month');
-                    var year = widget.bill.year;
-                    var day = '1';
-
-                    User editUser = User(
-                      username: widget.user.username,
-                      password: widget.user.password,
-                      extraUnit: double.parse(_extraUsage),
-                      totalUnit: double.parse(_meterReading),
-                      previousMonthUnit: double.parse(_previousReading),
-                      unitPrice: double.parse(_unitPrice),
-                      housename: widget.user.housename,
-                      role: widget.user.role,
-                    );
-
-                    goto(
-                      context,
-                      LoadingPage(
-                        future: users.editBill(
-                            editUser, month, year.toString(), day),
-                        successPage: ViewBills(
-                          editorUser: widget.editorUser,
-                          user: widget.user,
-                        ),
-                        failurePage: ViewBillDataEditor(
-                          bill: widget.bill,
-                          user: widget.user,
-                          editorUser: widget.editorUser,
-                          appBar: widget.appBar,
-                        ),
-                      ),
-                    );
+                    setState(() {
+                      meterReadingEdit = true;
+                    });
                   },
-                )
-              : const SizedBox()
-        ],
+                  onPressed2: () {
+                    setState(() {
+                      meterReadingEdit = false;
+                      _meterReading = _meterReadingController.text;
+                      updateBill();
+                    });
+                  }),
+            ),
+            ListTile(
+              title: const MyText(text: 'Previous Reading'),
+              trailing: setEditInfo(
+                  text: '$_previousReading units',
+                  controller: _previousReadingController,
+                  edit: previousReadingEdit,
+                  onPressed: () {
+                    setState(() {
+                      previousReadingEdit = true;
+                    });
+                  },
+                  onPressed2: () {
+                    setState(() {
+                      previousReadingEdit = false;
+                      _previousReading = _previousReadingController.text;
+                      updateBill();
+                    });
+                  }),
+            ),
+            ListTile(
+              title: const MyText(text: 'Monthly Usage'),
+              trailing: MyText(text: '$monthlyUsage units'),
+            ),
+            ListTile(
+              title: const MyText(text: 'Extra Usage'),
+              trailing: setEditInfo(
+                  text: '$_extraUsage units',
+                  controller: _extraUsageController,
+                  edit: extraUsageEdit,
+                  onPressed: () {
+                    setState(() {
+                      extraUsageEdit = true;
+                    });
+                  },
+                  onPressed2: () {
+                    setState(() {
+                      extraUsageEdit = false;
+                      _extraUsage = _extraUsageController.text;
+                      updateBill();
+                    });
+                  }),
+            ),
+            ListTile(
+              title: const MyText(text: 'Total Usage'),
+              trailing: MyText(text: '$totalUsage units'),
+            ),
+            ListTile(
+              title: const MyText(text: 'Unit Price'),
+              trailing: setEditInfo(
+                  text: '$_unitPrice \$',
+                  controller: _unitPriceController,
+                  edit: unitPriceEdit,
+                  onPressed: () {
+                    setState(() {
+                      unitPriceEdit = true;
+                    });
+                  },
+                  onPressed2: () {
+                    setState(() {
+                      unitPriceEdit = false;
+                      _unitPrice = _unitPriceController.text;
+                      updateBill();
+                    });
+                  }),
+            ),
+            ListTile(
+              title: const MyText(text: 'Monthly Bill'),
+              trailing: MyText(text: '$monthlyBill \$'),
+            ),
+            const MyText(
+              text: 'Water Bill',
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+            ListTile(
+              title: const MyText(text: 'Total'),
+              trailing: setEditInfo(
+                text: '$_wbillTotal \$',
+                controller: _wbillTotalController,
+                edit: wbillTotalEdit,
+                onPressed: () {
+                  setState(() {
+                    wbillTotalEdit = true;
+                  });
+                },
+                onPressed2: () {
+                  setState(() {
+                    wbillTotalEdit = false;
+                    _wbillTotal = _wbillTotalController.text;
+                    waterBill?.amount = parseDouble(_wbillTotalController.text);
+                    updateBill();
+                  });
+                },
+              ),
+            ),
+            Container(
+              height: 1,
+              width: MediaQuery.of(context).size.width * .95,
+              color: Colors.black.withOpacity(0.5),
+            ),
+            ListTile(
+              title: const MyText(
+                text: "Total",
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+              trailing: MyText(
+                text: '$_electriWaterTotal \$',
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+            warnings != null
+                ? Column(
+                    children: [
+                      for (var warning in warnings!)
+                        MyText(
+                          text: warning,
+                          textColor: Colors.red.withOpacity(.6),
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                    ],
+                  )
+                : Container(),
+            isEdited
+                ? MyTextButton(
+                    label: const MyText(text: 'Save'),
+                    onPressed: () {
+                      Users users = Users(user: widget.editorUser);
+                      var month = widget.bill.month;
+                      printf('month: $month');
+                      var year = widget.bill.year;
+                      var day = '1';
+
+                      User editUser = User(
+                        username: widget.user.username,
+                        password: widget.user.password,
+                        extraUnit: double.parse(_extraUsage),
+                        totalUnit: double.parse(_meterReading),
+                        previousMonthUnit: double.parse(_previousReading),
+                        unitPrice: double.parse(_unitPrice),
+                        housename: widget.user.housename,
+                        role: widget.user.role,
+                      );
+
+                      goto(
+                        context,
+                        LoadingPage(
+                          future: users.editBill(
+                              editUser, month, year.toString(), day),
+                          successPage: ViewBills(
+                            editorUser: widget.editorUser,
+                            user: widget.user,
+                          ),
+                          failurePage: ViewBillDataEditor(
+                            bill: widget.bill,
+                            user: widget.user,
+                            editorUser: widget.editorUser,
+                            appBar: widget.appBar,
+                            waterBills: widget.waterBills,
+                          ),
+                        ),
+                      );
+                    },
+                  )
+                : const SizedBox()
+          ],
+        ),
       ),
     );
   }

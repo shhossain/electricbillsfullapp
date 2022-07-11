@@ -111,8 +111,6 @@ showSnackBar(String msg,
     try {
       snackbarKey.currentState?.showSnackBar(snackBar);
     } catch (_) {
-      context = storeContext.first;
-      ScaffoldMessenger.maybeOf(context)?.showSnackBar(snackBar);
     }
   }
 }
