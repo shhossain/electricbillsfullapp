@@ -10,8 +10,21 @@ on:
 # on: push    # Default will running for every branch.
     
 jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+      - run: flutter pub get
+      - run: flutter analyze .
+      - run: flutter test
+
   buildWeb:
     name: Build Web And Test
+    needs: [test]
     env:
       my_secret: ${{secrets.commit_secret}}
     runs-on: ubuntu-latest
@@ -37,7 +50,7 @@ jobs:
 
   buildApk:
     name: Build Apk
-    needs: [buildWeb]
+    needs: [test]
     # This job will run on ubuntu virtual machine
     runs-on: ubuntu-latest
     steps:
@@ -58,12 +71,6 @@ jobs:
     
     # # Check for any formatting issues in the code.
     # - run: flutter format --set-exit-if-changed .
-    
-    # Statically analyze the Dart code for any errors.
-    - run: flutter analyze .
-    
-    # Run widget tests for our flutter project.
-    # - run: flutter test
     
     # Build apk.
     - run: flutter build apk
