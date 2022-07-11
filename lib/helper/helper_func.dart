@@ -107,9 +107,12 @@ showSnackBar(String msg,
       duration: Duration(milliseconds: milliseconds),
     );
 
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    Future.delayed(Duration.zero, () {
-      ScaffoldMessenger.of(context!).showSnackBar(snackBar);
-    });
+    snackbarKey.currentState?.hideCurrentSnackBar();
+    try {
+      snackbarKey.currentState?.showSnackBar(snackBar);
+    } catch (_) {
+      context = storeContext.first;
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(snackBar);
+    }
   }
 }

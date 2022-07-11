@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:electricbills/api/sign_user.dart';
+import 'package:electricbills/constants.dart';
 import 'package:electricbills/env.dart';
 import 'package:electricbills/helper/helper_func.dart';
 import 'package:electricbills/models/user.dart';
@@ -29,12 +30,6 @@ class _LoginPageState extends State<LoginPage> {
 
   String? warningMsg;
   bool firstTime = true;
-
-  @override
-  void initState() {
-    super.initState();
-    checkInternet();
-  }
 
   login(context) {
     var usename = usenameController.text;
@@ -77,17 +72,20 @@ class _LoginPageState extends State<LoginPage> {
     return false;
   }
 
-  checkInternet() async {
+  checkInternet(BuildContext context) async {
     if (!checkedInternet) {
       checkedInternet = true;
       while (true) {
-        if ((await isinternet())) {
+        if (!(await isinternet())) {
           internetAvailable = true;
-          return;
+          await Future.delayed(const Duration(seconds: 60));
+          continue;
         }
         internetAvailable = false;
         showSnackBar('No Internet Connection',
-            duration: 3, icon: const Icon(Icons.wifi_off, color: Colors.white));
+            duration: 3,
+            icon: const Icon(Icons.wifi_off, color: Colors.white),
+            context: context);
         await Future.delayed(Duration(seconds: internetAvailable ? 60 : 10));
       }
     }
@@ -95,6 +93,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    checkInternet(context);
     if (firstTime) {
       firstTime = false;
       if (signWaringMsg != null) {

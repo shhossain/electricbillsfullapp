@@ -573,7 +573,7 @@ class _AddWaterBillState extends State<AddWaterBill> {
 
                 if (amount == 0) {
                   showSnackBar("Please enter amount",
-                      icon: Icon(Icons.error, color: Colors.red.shade400));
+                      icon: Icon(Icons.error, color: Colors.red.shade400),context: context);
                   return;
                 }
                 Users users = Users(user: widget.editorUser);
@@ -594,6 +594,7 @@ class _AddWaterBillState extends State<AddWaterBill> {
                     color:
                         result[0] ? Colors.green.shade400 : Colors.red.shade400,
                   ),
+                  context: context
                 );
 
                 // goto(
