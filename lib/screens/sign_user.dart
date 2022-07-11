@@ -127,7 +127,7 @@ class _UserSignState extends State<UserSign> {
     else {
       if (!isSnackBarShown){
         // ignore: use_build_context_synchronously
-        showSnackBar(context, jsonData['msg']);
+        showSnackBar( jsonData['msg'],context: context);
         isSnackBarShown = true;
       }
     }
@@ -344,6 +344,30 @@ class _UserSignState extends State<UserSign> {
               borderRadius: 100,
               child: MyTextButton(
                 onPressed: () {
+                  // check username and password
+                  if (widget.usenameController.text.isEmpty) {
+                    setState(() {
+                      warningMsg = "Username is required";
+                    });
+                  } else if (widget.passwordController.text.isEmpty) {
+                    setState(() {
+                      warningMsg = "Password is required";
+                    });
+                  } else if (widget.housenameController.text.isEmpty) {
+                    setState(() {
+                      warningMsg = "House name is required";
+                    });
+                  } else if (widget.emailController != null &&
+                      widget.emailController!.text.isEmpty) {
+                    setState(() {
+                      warningMsg = "Email is required";
+                    });
+                  } else {
+                    setState(() {
+                      warningMsg = null;
+                    });
+                  }
+
                   // chek for valid email
                   if (widget.emailController != null) {
                     // warningMsg = "";
@@ -351,11 +375,16 @@ class _UserSignState extends State<UserSign> {
                       setState(() {
                         warningMsg = "Invalid email";
                       });
-                      return;
+                    } else {
+                      setState(() {
+                        warningMsg = null;
+                      });
                     }
                   }
                   if (widget.onPressed != null) {
-                    widget.onPressed!();
+                    if (warningMsg == null) {
+                      widget.onPressed!();
+                    }
                   }
                 },
                 label: MyText(

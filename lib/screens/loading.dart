@@ -39,7 +39,7 @@ class _LoadingPageState extends State<LoadingPage> {
               if (data[0]) {
                 msg = data[1];
                 if (!isSnackBarShown) {
-                  showSnackBar(context, msg,icon: Icon(Icons.check,color: Colors.green.shade400,));
+                  showSnackBar(msg,icon: Icon(Icons.check,color: Colors.green.shade400,),context: context);
                   isSnackBarShown = true;
                 }
                 return widget.successPage;
@@ -48,7 +48,7 @@ class _LoadingPageState extends State<LoadingPage> {
                 signWaringMsg = data[1];
                 addUserWaringMsg = data[1];
                 if (!isSnackBarShown) {
-                  showSnackBar(context, msg,icon: Icon(Icons.error,color: Colors.red.shade400,));
+                  showSnackBar(msg,icon: Icon(Icons.error,color: Colors.red.shade400,),context: context);
                   isSnackBarShown = true;
                 }
                 return widget.failurePage;

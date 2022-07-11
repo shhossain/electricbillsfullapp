@@ -30,6 +30,12 @@ class _LoginPageState extends State<LoginPage> {
   String? warningMsg;
   bool firstTime = true;
 
+  @override
+  void initState() {
+    super.initState();
+    checkInternet();
+  }
+
   login(context) {
     var usename = usenameController.text;
     var password = passwordController.text;
@@ -71,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
     return false;
   }
 
-  checkInternet(BuildContext context) async {
+  checkInternet() async {
     if (!checkedInternet) {
       checkedInternet = true;
       while (true) {
@@ -80,7 +86,7 @@ class _LoginPageState extends State<LoginPage> {
           return;
         }
         internetAvailable = false;
-        showSnackBar(context, 'No Internet Connection',
+        showSnackBar('No Internet Connection',
             duration: 3, icon: const Icon(Icons.wifi_off, color: Colors.white));
         await Future.delayed(Duration(seconds: internetAvailable ? 60 : 10));
       }
@@ -89,8 +95,6 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    checkInternet(context);
-
     if (firstTime) {
       firstTime = false;
       if (signWaringMsg != null) {
