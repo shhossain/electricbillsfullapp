@@ -76,7 +76,7 @@ class _LoginPageState extends State<LoginPage> {
     if (!checkedInternet) {
       checkedInternet = true;
       while (true) {
-        if (!(await isinternet())) {
+        if ((await isinternet())) {
           internetAvailable = true;
           await Future.delayed(const Duration(seconds: 60));
           continue;
