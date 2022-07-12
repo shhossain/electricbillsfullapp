@@ -80,5 +80,32 @@ jobs:
       with:
         name: release-apk
         path: build/app/outputs/apk/release/app-release.apk
+
+    - name: version
+    - run: echo "1.2.0"
+    - id: version
+    - name: release
+    - uses: actions/create-release@v1
+    - id: create_release
+    - with:
+        draft: false
+        prerelease: false
+        release_name: ${{ steps.version.outputs.version }}
+        tag_name: "v1.2.0"
+        body_path: CHANGELOG.md
+    - env:
+        GITHUB_TOKEN: ${{secrets.commit_secret}}
+
+    - name: upload apk artifact
+    - uses: actions/upload-release-asset@v1
+    - env:
+      GITHUB_TOKEN: ${{secrets.commit_secret}}
+    - with:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      asset_path: ./build/app/outputs/apk/release/app-release.apk
+      asset_name: mybill.apk
+      asset_content_type: application/vnd.android.package-archive
+
+
   
   
