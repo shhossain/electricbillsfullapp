@@ -81,7 +81,7 @@ jobs:
         name: release-apk
         path: build/app/outputs/apk/release/app-release.apk
 
-    - name: version
+    # - name: version
     - run: echo "1.2.0"
     - id: version
     # - name: release
