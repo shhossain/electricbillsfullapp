@@ -1,8 +1,9 @@
-# 1.2.0 (12th June 2022)
+# 1.2.1 (14th June 2022)
 ## Release Highlights
-Added water bill payment feature.
+Update and Some Bug Fix.
 
--  Add water bill payment feature.
+- Update available fix
+- More bug fix
 
 ## Features
 -  Add Electricity and Water Bill

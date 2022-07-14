@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:electricbills/api/api_details.dart';
-import 'package:electricbills/api/get_path.dart';
+// import 'package:electricbills/api/get_path.dart';
 import 'package:electricbills/api/request.dart';
 import 'package:electricbills/constants.dart';
 import 'package:electricbills/env.dart';
@@ -10,15 +10,16 @@ import 'package:electricbills/models/user.dart';
 import 'package:electricbills/screens/login.dart';
 import 'package:electricbills/screens/registration.dart';
 import 'package:electricbills/widgets/buttons.dart';
-import 'package:electricbills/widgets/download.dart';
+// import 'package:electricbills/widgets/download.dart';
 import 'package:electricbills/widgets/goto.dart';
 import 'package:electricbills/widgets/rounded_box.dart';
 import 'package:electricbills/widgets/text_field.dart';
 import 'package:electricbills/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:permission_handler/permission_handler.dart';
+// import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:html' as html;
 
 class UserSign extends StatefulWidget {
   final TextEditingController usenameController;
@@ -107,7 +108,10 @@ class _UserSignState extends State<UserSign> {
                   MyTextButton(
                     label: const Text('Update'),
                     onPressed: () async {
-                      await installApp(context);
+                      var res = await requests.get('$apiUrl/api/download/$os');
+                      var jsonData = jsonDecodeAny(res.body);
+                      var url = jsonData['url'];
+                      html.window.open(url, '_blank');
                     },
                   ),
                   MyTextButton(
@@ -134,46 +138,46 @@ class _UserSignState extends State<UserSign> {
     }
   }
 
-  installApp(BuildContext context) async {
-    String url = "$apiUrl/api/download/";
-    String fileName = '';
-    if (Platform.isAndroid) {
-      url += 'apk';
-      fileName = 'app.apk';
-    } else if (Platform.isIOS) {
-      url += 'ios';
-      fileName = 'app.ipa';
-    } else {
-      url += 'exe';
-      fileName = 'app.exe';
-    }
-    String path = await getPath(fileName);
-    if (await Permission.storage.request().isGranted) {
-      showDialog(
-          context: context,
-          builder: (context) {
-            return DownloadFile(url: url, filePath: path);
-          });
-    } else {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Permission denied'),
-            content: const Text('Please grant storage permission'),
-            actions: <Widget>[
-              MyTextButton(
-                label: const Text('Close'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
-  }
+  // installApp(BuildContext context) async {
+  //   String url = "$apiUrl/api/download/";
+  //   String fileName = '';
+  //   if (Platform.isAndroid) {
+  //     url += 'apk';
+  //     fileName = 'app.apk';
+  //   } else if (Platform.isIOS) {
+  //     url += 'ios';
+  //     fileName = 'app.ipa';
+  //   } else {
+  //     url += 'exe';
+  //     fileName = 'app.exe';
+  //   }
+  //   String path = await getPath(fileName);
+  //   if (await Permission.storage.request().isGranted) {
+  //     showDialog(
+  //         context: context,
+  //         builder: (context) {
+  //           return DownloadFile(url: url, filePath: path);
+  //         });
+  //   } else {
+  //     showDialog(
+  //       context: context,
+  //       builder: (context) {
+  //         return AlertDialog(
+  //           title: const Text('Permission denied'),
+  //           content: const Text('Please grant storage permission'),
+  //           actions: <Widget>[
+  //             MyTextButton(
+  //               label: const Text('Close'),
+  //               onPressed: () {
+  //                 Navigator.of(context).pop();
+  //               },
+  //             ),
+  //           ],
+  //         );
+  //       },
+  //     );
+  //   }
+  // }
 
   setSaveUser() async {
     var savedUser = await Storage.getUser('savedUser');

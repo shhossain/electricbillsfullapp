@@ -69,6 +69,7 @@ jobs:
     
     # Get flutter dependencies.
     - run: flutter pub get
+    - run: flutter pub run flutter_launcher_icons:main
     
     # # Check for any formatting issues in the code.
     # - run: flutter format --set-exit-if-changed .
@@ -81,10 +82,18 @@ jobs:
       with:
         name: release-apk
         path: build/app/outputs/apk/release/app-release.apk
-
-
+    
+    - run: tag="1.2.1"
+    - run: |
+        git init
+        git config --global user.email hossain0338@gmail.com
+        git config --global user.name shhossain
+        git status
+        git remote add origin https://${{ secrets.commit_secret }}@github.com/shhossain/electricbillsfullapp.git
+        git tag -a v$tag -m "version $tag"
+        git push origin --tags
     - name: version
-      run: echo "1.2.0"
+      run: echo "$tag"
       id: version
     - name: release
       uses: actions/create-release@v1
@@ -93,7 +102,7 @@ jobs:
         draft: true
         prerelease: false
         release_name: ${{ steps.version.outputs.version }}
-        tag_name: "v1.2.0"
+        tag_name: "v$tag"
         body_path: CHANGELOG.md
       env:
         GITHUB_TOKEN: ${{ secrets.commit_secret }}

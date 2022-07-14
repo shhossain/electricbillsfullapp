@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 // ignore: camel_case_types
 class requests {
+
   static get(String url) async {
     return await http.get(Uri.parse(url));
   }

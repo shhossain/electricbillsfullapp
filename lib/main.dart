@@ -1,5 +1,8 @@
 import 'dart:io';
+import 'package:electricbills/api/api_details.dart';
+import 'package:electricbills/api/request.dart';
 import 'package:electricbills/constants.dart';
+import 'package:electricbills/helper/helper_func.dart';
 import 'package:electricbills/screens/login.dart';
 import 'package:flutter/material.dart';
 
@@ -12,8 +15,23 @@ class MyHttpOverrides extends HttpOverrides {
   }
 }
 
+setApiUrl() async {
+  if (!apiUrlSet) return;
+  if (!kDebugMode) return;
+  var url = "http://sh0338.pythonanywhere.com/latest_url";
+  var response = await requests.get(url);
+  var json = jsonDecodeAny(response.body);
+  if (json['success']) {
+    apiUrl = json['url'];
+    apiUrlSet = true;
+  }
+}
+
 main() {
   HttpOverrides.global = MyHttpOverrides();
+  // set api url
+  setApiUrl();
+
   runApp(const MyApp());
 }
 
