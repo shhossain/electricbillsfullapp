@@ -19,7 +19,6 @@ class _DownloadFileState extends State<DownloadFile> {
 
   @override
   void initState() {
-    print('file path: ${widget.filePath}');
     Dio dio = Dio();
     dio.download(widget.url, widget.filePath,
         onReceiveProgress: (int received, int total) {
