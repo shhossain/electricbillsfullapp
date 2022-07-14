@@ -42,6 +42,7 @@ dependencies:
   dio: ^4.0.6
   permission_handler: ^10.0.0
   flutter_lints: any
+  url_launcher: ^6.1.5
 
 dev_dependencies:
   flutter_test:

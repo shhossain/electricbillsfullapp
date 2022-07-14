@@ -19,8 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 // import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as html;
+import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
 class UserSign extends StatefulWidget {
   final TextEditingController usenameController;
@@ -112,7 +111,7 @@ class _UserSignState extends State<UserSign> {
                       var res = await requests.get('$apiUrl/api/download/$os');
                       var jsonData = jsonDecodeAny(res.body);
                       var url = jsonData['url'];
-                      html.window.open(url, '_blank');
+                      await url_launcher.launchUrl(url);
                     },
                   ),
                   MyTextButton(
