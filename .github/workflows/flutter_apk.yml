@@ -69,7 +69,7 @@ jobs:
     
     # Get flutter dependencies.
     - run: flutter pub get
-    - run: flutter pub run flutter_launcher_icons:main
+    # - run: flutter pub run flutter_launcher_icons:main
     
     # # Check for any formatting issues in the code.
     # - run: flutter format --set-exit-if-changed .
