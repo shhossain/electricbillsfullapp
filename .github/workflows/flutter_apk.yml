@@ -87,7 +87,7 @@ jobs:
     - run: |
         git config --global user.email hossain0338@gmail.com
         git config --global user.name shhossain
-        git remote set-url origin https://${{secrets.commit_secret}}@github.com/shhossain/billsapp.git
+        git remote set-url origin https://${{secrets.commit_secret}}@github.com/shhossain/electricbillsfullapp.git
         git tag -a v$tag -m "version $tag"
         git push origin --tags
     - name: version
