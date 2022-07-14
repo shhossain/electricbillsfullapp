@@ -6,6 +6,9 @@ on:
   push:
     branches:
     - main
+
+env:
+  VERSION: 1.2.1
     
 # on: push    # Default will running for every branch.
     
@@ -83,23 +86,20 @@ jobs:
         name: release-apk
         path: build/app/outputs/apk/release/app-release.apk
     
-    - name: version
-      run: echo "1.2.1"
-      id: version
     - run: |
         git config --global user.email hossain0338@gmail.com
         git config --global user.name shhossain
         git remote set-url origin https://${{secrets.commit_secret}}@github.com/shhossain/electricbillsfullapp.git
-        git tag -a "v${{ steps.version.outputs.version }}" -m "version ${{ steps.version.outputs.version }}"
+        git tag -a "v${{ env.VERSION }}" -m "version ${{ env.VERSION }}"
         git push origin --tags
     - name: release
       uses: actions/create-release@v1
       id: create_release
       with:
-        draft: flase
+        draft: false
         prerelease: false
-        release_name: ${{ steps.version.outputs.version }}
-        tag_name: "v${{ steps.version.outputs.version }}"
+        release_name: "mybill_${{ env.VERSION }}"
+        tag_name: "v${{ env.VERSION }}"
         body_path: CHANGELOG.md
       env:
         GITHUB_TOKEN: ${{ secrets.commit_secret }}
